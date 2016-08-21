@@ -1,5 +1,17 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/idle[0]}
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/fault_sequence[0]}
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/data_frame[0]}
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/control_frame[0]}
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/idle[1]}
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/fault_sequence[1]}
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/data_frame[1]}
+add wave -noupdate -expand -group {Top Transactions} {/top/xaui/control_frame[1]}
+add wave -noupdate -group {Sub Transactions} {/top/xaui/start_preamble_phase[0]}
+add wave -noupdate -group {Sub Transactions} {/top/xaui/preamble_sfd_phase_10g[0]}
+add wave -noupdate -group {Sub Transactions} {/top/xaui/start_preamble_phase[1]}
+add wave -noupdate -group {Sub Transactions} {/top/xaui/preamble_sfd_phase_10g[1]}
 add wave -noupdate -group xaui /top/xaui/iclk_0
 add wave -noupdate -group xaui /top/xaui/iclk_1
 add wave -noupdate -group xaui /top/xaui/ian_clk_0
@@ -422,7 +434,7 @@ add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge
 add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txsfifo_wdata
 add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txsfifo_wen
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {408860 ps} 0}
+WaveRestoreCursors {{Cursor 1} {260722 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 271
 configure wave -valuecolwidth 100
@@ -438,4 +450,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {5250 ns}
+WaveRestoreZoom {0 ps} {231095 ps}

@@ -20,6 +20,15 @@ package FullTest_pkg;
    import uvm_pkg::*;
  `include <uvm_macros.svh>
 
+   import QUESTA_MVC::*;
+
+   import mvc_pkg::*;
+   export mvc_pkg::mvc_item_listener;
+   export mvc_pkg::mvc_sequence;
+   export mvc_pkg::mvc_sequence_item_base;
+   export mvc_pkg::mvc_config_base;
+   
+
 endpackage // FullTest_pkg
 
 `endif

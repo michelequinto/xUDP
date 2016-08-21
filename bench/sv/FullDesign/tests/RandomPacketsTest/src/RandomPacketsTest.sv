@@ -9,6 +9,7 @@
 // Status          : Unknown, Use with caution!
 
 `include "genericTest.sv"
+`include "ethernet_udp_ipv4_sequence.sv"
 
 //Class: RandomPacketsTest
 //The test send random Ethernet packets
@@ -26,9 +27,11 @@ class RandomPacketsTest extends genericTest;
    //Task: start_xUDP_sequence
    //The task start  <ethernet_top_sequence_t> sending random Ethernet frames.
    virtual task start_xUDP_sequence();
-      ethernet_top_sequence seq =  ethernet_top_sequence::type_id::create("EthernetTopSequence");
+      
+      ethernet_udp_ipv4_sequence seq = ethernet_udp_ipv4_sequence::type_id::create("EthernetTopSequence");
+      //ethernet_top_sequence seq =  ethernet_top_sequence::type_id::create("EthernetTopSequence");
 
-      if( ! seq.randomize() )
+      if( !seq.randomize() )
 	`uvm_error("RAND_ERROR", "Randomisation failed");
       fork
 	 seq.start( env.xaui_sim_agent.m_sequencer );
