@@ -9,7 +9,7 @@ __import__('os').environ.get('QUESTA_MVC_HOME') + '/examples/ethernet/common+' +
 __import__('os').environ.get('QUESTA_MVC_HOME') + '/questa_mvc_src/sv/ethernet/ '
 
 top_module = "top"
-sim_tool = "vsim"
+sim_tool = "modelsim"
 
 files = ["src/genericTest.sv"]
 

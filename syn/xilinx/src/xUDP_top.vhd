@@ -197,6 +197,7 @@ signal xgmii_rxc_int            : std_logic_vector(7 downto 0)  := (others => '0
 signal reset_156_r1             : std_logic;
 signal reset_156_r2             : std_logic;
 signal reset_156                : std_logic;
+signal resetn_156               : std_logic;
 
 signal signal_detect            : std_logic_vector(3 downto 0);      
 signal align_status             : std_logic;
@@ -265,7 +266,7 @@ phy10g_refclk_ibufds : IBUFDS_GTXE1
              CEB   => '0',
              ODIV2 => open );
 
-   mmcm_txoutclk : MMCM_BASE
+mmcm_txoutclk : MMCM_BASE
   generic map (
     BANDWIDTH            => "HIGH",
     CLKFBOUT_MULT_F      => 6.000,
@@ -312,12 +313,14 @@ begin
   end if;
 end process;
 
+resetn_156 <= not reset_156; 
+
 -- Synthesise input and output registers
 p_xgmii_tx_reg : process (clk156)
 begin
   if rising_edge(clk156) then
     xgmii_txd_int <= xgmii_txd;
-  xgmii_txc_int <= xgmii_txc;
+    xgmii_txc_int <= xgmii_txc;
   end if;
 end process p_xgmii_tx_reg;
 
@@ -330,21 +333,17 @@ begin
 end process p_xgmii_rx_reg;
 
 --to be checked in simulation
-reset_tx_rx : process (clk156, reset)
-begin 
-  if ( reset = '1' ) then
-    configuration_vector(3 downto 2) <= "00";    
-  elsif rising_edge(clk156) then
-    if ( status_vector /= "11111100" ) then
-      configuration_vector(2) <= configuration_vector(2) xor '1';
-      configuration_vector(3) <= configuration_vector(3) xor '1';    
-    end if;
-  end if;     
-end process;
+xaui_init_inst : entity work.xaui_init
+  port map (
+    rstn => resetn_156,
+    clk156 => clk156,
+    status_vector => status_vector,
+    config_vector => configuration_vector );
 
-configuration_vector(1 downto 0) <= "00";
-configuration_vector(6 downto 4) <= "000";
-
+-- The SIGNAL_DETECT signals are intended to be driven by an attached 10GBASE-LX4 optical module;
+-- they signify that each of the four optical receivers is receiving illumination 
+-- and is therefore not just putting out noise. If an optical module is not in use, this four-wire 
+-- bus should be tied to 1111.
 signal_detect <= (others => '1');
 
 dclk <= clk156; 	-- GTP transceiver DRP bus not used for the time being
@@ -417,16 +416,6 @@ begin
 
 end block XGE_MANAGMENT_BLOCK; 
 
--------------------------------------------------------------------------------
--- Drive the xge temporary
--------------------------------------------------------------------------------
-pkt_tx_val <= '0';
-pkt_tx_sop <= '0';
-pkt_tx_mod <= (others => '0');
-pkt_tx_eop <= '0';
-pkt_tx_data <= (others => '0');
-pkt_rx_ren <= '0';
-
 -------------------------------------------------------------------------------  
 -- Board clock management logic
 -------------------------------------------------------------------------------
@@ -467,8 +456,19 @@ begin
   FPGA_LED(0) <= hbCnt(23);
 end process;
 
+-------------------------------------------------------------------------------
+-- Drive the xge mac temporary
+-------------------------------------------------------------------------------
+pkt_tx_val <= '0';
+pkt_tx_sop <= '0';
+pkt_tx_mod <= (others => '0');
+pkt_tx_eop <= '0';
+pkt_tx_data <= (others => '0');
+pkt_rx_ren <= '0';
 
---some temporary assignment
+-------------------------------------------------------------------------------
+-- Drive MDIO temporary
+-------------------------------------------------------------------------------
 mdio_i <= '0';
 mdio_o <= '1';
 mdio_t <= '1';

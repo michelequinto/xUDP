@@ -6,42 +6,98 @@
 ## variables #############################
 PWD := $(shell pwd)
 
-MODELSIM_INI_PATH := /opt/questa_sv_afv_10.3c_1/questasim//bin/..
+MODELSIM_INI_PATH := /opt/questa_sv_afv_10.4/questasim/bin/..
 
 VCOM_FLAGS := -quiet -modelsimini modelsim.ini
 VSIM_FLAGS :=
 VLOG_FLAGS := -quiet -modelsimini modelsim.ini 
-VERILOG_SRC := src/RandomPacketsTest.sv \
-../../../../../../../../../opt/Xilinx/14.6/ISE_DS/ISE/verilog/src/glbl.v \
+VERILOG_SRC := ../../../../../rtl/verilog/ipcores/xge_mac/verilog/stats.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_hold_fifo.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/sync_clk_core.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_enqueue.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_data_fifo.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/sync_clk_wb.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/CRC32_D8.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_enqueue.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/meta_sync.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/sync_clk_xgmii_tx.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_mem_small.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_data_fifo.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/utils.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_mem_medium.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_fifo_ctrl.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_stats_fifo.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_fifo.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/wishbone_if.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/fault_sm.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/xge_mac.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_stats_fifo.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/stats_sm.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/meta_sync_single.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_dequeue.v \
+src/RandomPacketsTest.sv \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_dequeue.v \
+../../../../../../../../../opt/Xilinx/14.7/ISE_DS/ISE/verilog/src/glbl.v \
+../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_hold_fifo.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/CRC32_D64.v \
 
-VERILOG_OBJ := work/RandomPacketsTest/.RandomPacketsTest_sv \
+VERILOG_OBJ := work/stats/.stats_v \
+work/rx_hold_fifo/.rx_hold_fifo_v \
+work/sync_clk_core/.sync_clk_core_v \
+work/tx_enqueue/.tx_enqueue_v \
+work/rx_data_fifo/.rx_data_fifo_v \
+work/sync_clk_wb/.sync_clk_wb_v \
+work/CRC32_D8/.CRC32_D8_v \
+work/rx_enqueue/.rx_enqueue_v \
+work/meta_sync/.meta_sync_v \
+work/sync_clk_xgmii_tx/.sync_clk_xgmii_tx_v \
+work/generic_mem_small/.generic_mem_small_v \
+work/tx_data_fifo/.tx_data_fifo_v \
+work/utils/.utils_v \
+work/generic_mem_medium/.generic_mem_medium_v \
+work/generic_fifo_ctrl/.generic_fifo_ctrl_v \
+work/rx_stats_fifo/.rx_stats_fifo_v \
+work/generic_fifo/.generic_fifo_v \
+work/wishbone_if/.wishbone_if_v \
+work/fault_sm/.fault_sm_v \
+work/xge_mac/.xge_mac_v \
+work/tx_stats_fifo/.tx_stats_fifo_v \
+work/stats_sm/.stats_sm_v \
+work/meta_sync_single/.meta_sync_single_v \
+work/rx_dequeue/.rx_dequeue_v \
+work/RandomPacketsTest/.RandomPacketsTest_sv \
+work/tx_dequeue/.tx_dequeue_v \
 work/glbl/.glbl_v \
+work/tx_hold_fifo/.tx_hold_fifo_v \
+work/CRC32_D64/.CRC32_D64_v \
 
-VHDL_SRC := ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_chanbond_monitor.vhd \
-../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper_gtx.vhd \
-../../../../../syn/xilinx/src/xUDP_top.vhd \
-../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper.vhd \
-../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_example_design.vhd \
-../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_block.vhd \
+VHDL_SRC := ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_block.vhd \
 ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4.vhd \
+../../../../../syn/xilinx/src/xaui_init.vhd \
+../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper_gtx.vhd \
 ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/simulation/demo_tb.vhd \
+../../../../../syn/xilinx/src/xUDP_top.vhd \
+../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_example_design.vhd \
+../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_chanbond_monitor.vhd \
 ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_tx_sync.vhd \
+../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper.vhd \
 
-VHDL_OBJ := work/xaui_v10_4_chanbond_monitor/.xaui_v10_4_chanbond_monitor_vhd \
-work/xaui_v10_4_gtx_wrapper_gtx/.xaui_v10_4_gtx_wrapper_gtx_vhd \
-work/xUDP_top/.xUDP_top_vhd \
-work/xaui_v10_4_gtx_wrapper/.xaui_v10_4_gtx_wrapper_vhd \
-work/xaui_v10_4_example_design/.xaui_v10_4_example_design_vhd \
-work/xaui_v10_4_block/.xaui_v10_4_block_vhd \
+VHDL_OBJ := work/xaui_v10_4_block/.xaui_v10_4_block_vhd \
 work/xaui_v10_4/.xaui_v10_4_vhd \
+work/xaui_init/.xaui_init_vhd \
+work/xaui_v10_4_gtx_wrapper_gtx/.xaui_v10_4_gtx_wrapper_gtx_vhd \
 work/demo_tb/.demo_tb_vhd \
+work/xUDP_top/.xUDP_top_vhd \
+work/xaui_v10_4_example_design/.xaui_v10_4_example_design_vhd \
+work/xaui_v10_4_chanbond_monitor/.xaui_v10_4_chanbond_monitor_vhd \
 work/xaui_v10_4_tx_sync/.xaui_v10_4_tx_sync_vhd \
+work/xaui_v10_4_gtx_wrapper/.xaui_v10_4_gtx_wrapper_vhd \
 
 LIBS := work
 LIB_IND := work/.work
 ## rules #################################
 sim: sim_pre_cmd modelsim.ini $(LIB_IND) $(VERILOG_OBJ) $(VHDL_OBJ)
-$(VERILOG_OBJ): $(VHDL_OBJ)
+$(VERILOG_OBJ) : modelsim.ini
 $(VHDL_OBJ): $(LIB_IND) modelsim.ini
 
 sim_pre_cmd:
@@ -53,53 +109,228 @@ sim_post_cmd: sim
 modelsim.ini: $(MODELSIM_INI_PATH)/modelsim.ini
 		cp $< . 2>&1
 clean:
-		rm -rf ./modelsim.ini $(LIBS)
+		rm -rf ./modelsim.ini $(LIBS) transcript  *.vcd *.wlf
 .PHONY: clean sim_pre_cmd sim_post_cmd
 
 work/.work:
 	(vlib work && vmap -modelsimini modelsim.ini work && touch work/.work )|| rm -rf work 
 
-work/RandomPacketsTest/.RandomPacketsTest_sv: src/RandomPacketsTest.sv
-		vlog -work work $(VLOG_FLAGS) -sv +incdir+../../environment+../../sequences+../genericTest/src+src +incdir+/opt/questa_verification_ip_10.3b//questa_mvc_src/sv+/opt/questa_verification_ip_10.3b//questa_mvc_src/sv/mvc_base+/opt/questa_verification_ip_10.3b//include+/opt/questa_verification_ip_10.3b//examples/ethernet/common+/opt/questa_verification_ip_10.3b//questa_mvc_src/sv/ethernet/  $<
+work/stats/.stats_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/stats.v \
+work/rx_stats_fifo/.rx_stats_fifo_v \
+work/tx_stats_fifo/.tx_stats_fifo_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/stats_sm/.stats_sm_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
 		@mkdir -p $(dir $@) && touch $@ 
 
 
-work/glbl/.glbl_v: ../../../../../../../../../opt/Xilinx/14.6/ISE_DS/ISE/verilog/src/glbl.v
-		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../../../../../opt/Xilinx/14.6/ISE_DS/ISE/verilog/src  $<
+work/rx_hold_fifo/.rx_hold_fifo_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_hold_fifo.v \
+work/generic_fifo/.generic_fifo_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
 		@mkdir -p $(dir $@) && touch $@ 
 
 
-
-work/xaui_v10_4_chanbond_monitor/.xaui_v10_4_chanbond_monitor_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_chanbond_monitor.vhd
-		vcom $(VCOM_FLAGS)  -work work $< 
-		@mkdir -p $(dir $@) && touch $@
-
-
-work/xaui_v10_4_gtx_wrapper_gtx/.xaui_v10_4_gtx_wrapper_gtx_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper_gtx.vhd
-		vcom $(VCOM_FLAGS)  -work work $< 
-		@mkdir -p $(dir $@) && touch $@
+work/sync_clk_core/.sync_clk_core_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/sync_clk_core.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
 
 
-work/xUDP_top/.xUDP_top_vhd: ../../../../../syn/xilinx/src/xUDP_top.vhd
-		vcom $(VCOM_FLAGS)  -work work $< 
-		@mkdir -p $(dir $@) && touch $@
+work/tx_enqueue/.tx_enqueue_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_enqueue.v \
+work/CRC32_D8/.CRC32_D8_v \
+work/utils/.utils_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/CRC32_D64/.CRC32_D64_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
 
 
-work/xaui_v10_4_gtx_wrapper/.xaui_v10_4_gtx_wrapper_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper.vhd \
-work/xaui_v10_4_gtx_wrapper_gtx/.xaui_v10_4_gtx_wrapper_gtx_vhd
-		vcom $(VCOM_FLAGS)  -work work $< 
-		@mkdir -p $(dir $@) && touch $@
+work/rx_data_fifo/.rx_data_fifo_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_data_fifo.v \
+work/generic_fifo/.generic_fifo_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
 
 
-work/xaui_v10_4_example_design/.xaui_v10_4_example_design_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_example_design.vhd
-		vcom $(VCOM_FLAGS)  -work work $< 
-		@mkdir -p $(dir $@) && touch $@
+work/sync_clk_wb/.sync_clk_wb_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/sync_clk_wb.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/meta_sync/.meta_sync_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/CRC32_D8/.CRC32_D8_v: ../../../../../rtl/verilog/ipcores/xge_mac/include/CRC32_D8.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/include  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/rx_enqueue/.rx_enqueue_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_enqueue.v \
+work/CRC32_D8/.CRC32_D8_v \
+work/utils/.utils_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/CRC32_D64/.CRC32_D64_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/meta_sync/.meta_sync_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/meta_sync.v \
+work/meta_sync_single/.meta_sync_single_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/sync_clk_xgmii_tx/.sync_clk_xgmii_tx_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/sync_clk_xgmii_tx.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/meta_sync/.meta_sync_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/generic_mem_small/.generic_mem_small_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_mem_small.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/tx_data_fifo/.tx_data_fifo_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_data_fifo.v \
+work/generic_fifo/.generic_fifo_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/utils/.utils_v: ../../../../../rtl/verilog/ipcores/xge_mac/include/utils.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/include  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/generic_mem_medium/.generic_mem_medium_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_mem_medium.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/generic_fifo_ctrl/.generic_fifo_ctrl_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_fifo_ctrl.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/rx_stats_fifo/.rx_stats_fifo_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_stats_fifo.v \
+work/generic_fifo/.generic_fifo_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/generic_fifo/.generic_fifo_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/generic_fifo.v \
+work/generic_fifo_ctrl/.generic_fifo_ctrl_v \
+work/generic_mem_small/.generic_mem_small_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/generic_mem_medium/.generic_mem_medium_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/wishbone_if/.wishbone_if_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/wishbone_if.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/fault_sm/.fault_sm_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/fault_sm.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/xge_mac/.xge_mac_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/xge_mac.v \
+work/stats/.stats_v \
+work/fault_sm/.fault_sm_v \
+work/tx_dequeue/.tx_dequeue_v \
+work/rx_hold_fifo/.rx_hold_fifo_v \
+work/tx_enqueue/.tx_enqueue_v \
+work/rx_data_fifo/.rx_data_fifo_v \
+work/sync_clk_wb/.sync_clk_wb_v \
+work/rx_dequeue/.rx_dequeue_v \
+work/rx_enqueue/.rx_enqueue_v \
+work/tx_hold_fifo/.tx_hold_fifo_v \
+work/sync_clk_xgmii_tx/.sync_clk_xgmii_tx_v \
+work/wishbone_if/.wishbone_if_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/tx_data_fifo/.tx_data_fifo_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/tx_stats_fifo/.tx_stats_fifo_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_stats_fifo.v \
+work/generic_fifo/.generic_fifo_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/stats_sm/.stats_sm_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/stats_sm.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/meta_sync_single/.meta_sync_single_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/meta_sync_single.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/rx_dequeue/.rx_dequeue_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/rx_dequeue.v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/RandomPacketsTest/.RandomPacketsTest_sv: src/RandomPacketsTest.sv \
+../../environment/xUDP_pkg.sv \
+../../environment/clk_reset.sv \
+../../environment/xUDP_config.sv \
+../genericTest/src/genericTest.sv \
+../genericTest/src/FullTest_pkg.sv \
+../../environment/xUDP_env.sv \
+../../environment/top.sv
+		vlog -work work $(VLOG_FLAGS) -sv +incdir+../../environment+../../sequences+../genericTest/src+src +incdir+/opt/questa_verification_ip_10.3c/questa_mvc_src/sv+/opt/questa_verification_ip_10.3c/questa_mvc_src/sv/mvc_base+/opt/questa_verification_ip_10.3c/include+/opt/questa_verification_ip_10.3c/examples/ethernet/common+/opt/questa_verification_ip_10.3c/questa_mvc_src/sv/ethernet/  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/tx_dequeue/.tx_dequeue_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_dequeue.v \
+work/CRC32_D8/.CRC32_D8_v \
+work/utils/.utils_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v \
+work/CRC32_D64/.CRC32_D64_v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/glbl/.glbl_v: ../../../../../../../../../opt/Xilinx/14.7/ISE_DS/ISE/verilog/src/glbl.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../../../../../opt/Xilinx/14.7/ISE_DS/ISE/verilog/src  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/tx_hold_fifo/.tx_hold_fifo_v: ../../../../../rtl/verilog/ipcores/xge_mac/verilog/tx_hold_fifo.v \
+work/generic_fifo/.generic_fifo_v \
+../../../../../rtl/verilog/ipcores/xge_mac/include/defines.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/verilog  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
+
+work/CRC32_D64/.CRC32_D64_v: ../../../../../rtl/verilog/ipcores/xge_mac/include/CRC32_D64.v
+		vlog -work work $(VLOG_FLAGS)  +incdir+../../../../../rtl/verilog/ipcores/xge_mac/include+../../../../../rtl/verilog/ipcores/xge_mac/include  $<
+		@mkdir -p $(dir $@) && touch $@ 
+
 
 
 work/xaui_v10_4_block/.xaui_v10_4_block_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_block.vhd \
-work/xaui_v10_4_gtx_wrapper/.xaui_v10_4_gtx_wrapper_vhd \
+work/xaui_v10_4/.xaui_v10_4_vhd \
 work/xaui_v10_4_chanbond_monitor/.xaui_v10_4_chanbond_monitor_vhd \
-work/xaui_v10_4_tx_sync/.xaui_v10_4_tx_sync_vhd
+work/xaui_v10_4_tx_sync/.xaui_v10_4_tx_sync_vhd \
+work/xaui_v10_4_gtx_wrapper/.xaui_v10_4_gtx_wrapper_vhd
 		vcom $(VCOM_FLAGS)  -work work $< 
 		@mkdir -p $(dir $@) && touch $@
 
@@ -109,12 +340,47 @@ work/xaui_v10_4/.xaui_v10_4_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xau
 		@mkdir -p $(dir $@) && touch $@
 
 
-work/demo_tb/.demo_tb_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/simulation/demo_tb.vhd
+work/xaui_init/.xaui_init_vhd: ../../../../../syn/xilinx/src/xaui_init.vhd
+		vcom $(VCOM_FLAGS)  -work work $< 
+		@mkdir -p $(dir $@) && touch $@
+
+
+work/xaui_v10_4_gtx_wrapper_gtx/.xaui_v10_4_gtx_wrapper_gtx_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper_gtx.vhd
+		vcom $(VCOM_FLAGS)  -work work $< 
+		@mkdir -p $(dir $@) && touch $@
+
+
+work/demo_tb/.demo_tb_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/simulation/demo_tb.vhd \
+work/xaui_v10_4_example_design/.xaui_v10_4_example_design_vhd
+		vcom $(VCOM_FLAGS)  -work work $< 
+		@mkdir -p $(dir $@) && touch $@
+
+
+work/xUDP_top/.xUDP_top_vhd: ../../../../../syn/xilinx/src/xUDP_top.vhd \
+work/xaui_v10_4_block/.xaui_v10_4_block_vhd \
+work/xge_mac/.xge_mac_v
+		vcom $(VCOM_FLAGS)  -work work $< 
+		@mkdir -p $(dir $@) && touch $@
+
+
+work/xaui_v10_4_example_design/.xaui_v10_4_example_design_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_example_design.vhd \
+work/xaui_v10_4_block/.xaui_v10_4_block_vhd
+		vcom $(VCOM_FLAGS)  -work work $< 
+		@mkdir -p $(dir $@) && touch $@
+
+
+work/xaui_v10_4_chanbond_monitor/.xaui_v10_4_chanbond_monitor_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_chanbond_monitor.vhd
 		vcom $(VCOM_FLAGS)  -work work $< 
 		@mkdir -p $(dir $@) && touch $@
 
 
 work/xaui_v10_4_tx_sync/.xaui_v10_4_tx_sync_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_tx_sync.vhd
+		vcom $(VCOM_FLAGS)  -work work $< 
+		@mkdir -p $(dir $@) && touch $@
+
+
+work/xaui_v10_4_gtx_wrapper/.xaui_v10_4_gtx_wrapper_vhd: ../../../../../rtl/vhdl/ipcores/xilinx/xaui/xaui_v10_4/example_design/xaui_v10_4_gtx_wrapper.vhd \
+work/xaui_v10_4_gtx_wrapper_gtx/.xaui_v10_4_gtx_wrapper_gtx_vhd
 		vcom $(VCOM_FLAGS)  -work work $< 
 		@mkdir -p $(dir $@) && touch $@
 
