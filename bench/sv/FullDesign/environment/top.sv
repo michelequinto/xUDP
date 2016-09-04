@@ -25,12 +25,15 @@ module automatic top;
    struct {
       logic [3:0] tx;
       logic [3:0] rx; } xaui_lanes;
-
+   
    for (genvar i=0; i<4; i++) begin
       assign xaui.lane_bit[1][i] = xaui_lanes.tx[i];
       assign xaui_lanes.rx[i] = xaui.lane_bit[0][i];
    end
-
+  
+   //assign xaui.lane_bit[0] = xaui.lane_bit[1];
+   
+   
 `ifndef USE_UVM_TLM_CLK
    clk_reset clk_rst_inst_xaui( xaui.iclk[0], xaui.iclk[1], xaui.ireset);
 `endif
@@ -66,13 +69,14 @@ module automatic top;
 	      .PHY_RSTN(),
 	      .PHY_LASI(), .PHY_INTA(),
 	      .PHY10G_RCK_P(clk156), .PHY10G_RCK_N(~clk156),
+   
 
 	      //XAUI
 	      .FXTX_P(xaui_lanes.tx), .FXTX_N(),
 	      .FXRX_P(xaui_lanes.rx), .FXRX_N(~xaui_lanes.rx) );
 
    initial begin
-      uvm_config_db #( xUDP_pkg::bfm_type ) :: set(null, "uvm_test_top", "xaui_interface", xaui );
+      uvm_config_db #( env_pkg::bfm_type ) :: set(null, "uvm_test_top", "ETH_10G_IF", xaui );
       run_test();
    end
 

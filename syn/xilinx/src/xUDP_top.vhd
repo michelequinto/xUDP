@@ -344,6 +344,7 @@ xaui_init_inst : entity work.xaui_init
 -- they signify that each of the four optical receivers is receiving illumination 
 -- and is therefore not just putting out noise. If an optical module is not in use, this four-wire 
 -- bus should be tied to 1111.
+
 signal_detect <= (others => '1');
 
 dclk <= clk156; 	-- GTP transceiver DRP bus not used for the time being
