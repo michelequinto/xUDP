@@ -101,25 +101,32 @@ function void full_test::do_tx_config();
 // This configures the QVIP's Tx Agent for the following settings
 // Active                 : 1
 // Tx/Rx                  : 1 (Tx)
-// Interface Type         : ETHERNET_XGMII
+// Interface Type         : ETHERNET_10GBASE_X
 // MDIO Type              : ETHERNET_MDIO_DISABLED
-// Clock                  : Internal 
-// Reset                  : Internal 
-// Coverage               : Tx Application packets coverage enabled
-// Listener               : Enabled for Data Frames
+// Clock                  : External 
+// Reset                  : External 
+// Coverage               : Tx and Rx coverage disabled
+// Listener               : Enabled for Data and Control Frames
 
   m_config.tx_cfg.agent_cfg.is_active               = 1;
   m_config.tx_cfg.agent_cfg.is_tx                   = 1;
-  m_config.tx_cfg.agent_cfg.if_type                 = mgc_ethernet_v1_0_pkg::ETHERNET_XGMII;
-  m_config.tx_cfg.agent_cfg.mdio_type               = mgc_ethernet_v1_0_pkg::ETHERNET_MDIO_DISABLED;
+  m_config.tx_cfg.agent_cfg.if_type                 = ETHERNET_10GBASE_X;
+  m_config.tx_cfg.agent_cfg.mdio_type               = ETHERNET_MDIO_DISABLED;
   m_config.tx_cfg.agent_cfg.ext_clock               = 0;
   m_config.tx_cfg.agent_cfg.ext_reset               = 0;
-  m_config.tx_cfg.agent_cfg.en_cvg.tx.app_pkts      = 1;
+  m_config.tx_cfg.agent_cfg.en_cvg.tx               = 6'h00;
+  m_config.tx_cfg.agent_cfg.en_cvg.rx               = 6'h00;
   m_config.tx_cfg.agent_cfg.en_txn_ltnr.data_frame  = 1;
+  m_config.tx_cfg.agent_cfg.en_txn_ltnr.cntrl_frame = 1;
 
   // Specific configurations setting directly in BFM
-  bfm.config_mac_type_frame_octet_receive_limit = 32'd100000;  // Setting Jumbo Frame Receive Limit
-  bfm.config_enable_vlan_double_tagged_frame = 1;
+  bfm.config_mac_pause_transmission = 0;             // Disabling Pause Feature
+  bfm.config_enable_clock_recovery  = 1;             // Enabling Clock Recovery
+  bfm.config_enable_differential_signaling = 0;      // Enabling Differential Signaling
+
+  // Specific configurations setting directly in BFM
+  //bfm.config_mac_type_frame_octet_receive_limit = 32'd100000;  // Setting Jumbo Frame Receive Limit
+  //bfm.config_enable_vlan_double_tagged_frame = 1;
 
 endfunction
 
@@ -138,7 +145,7 @@ task full_test::run_phase(uvm_phase phase);
   phase.raise_objection(this);
   fork
     test_seq.start( m_env.tx_agent.m_sequencer);  
-    timeout();
+    //timeout();
   join_any
   phase.drop_objection(this);
 
