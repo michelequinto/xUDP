@@ -1,0 +1,11 @@
+files = [ "arp_REQ.vhd",
+          "arp_RX.vhd",
+          "arp_STORE_br.vhd",
+          "arp_SYNC.vhd",
+          "arp_TX.vhd",
+          "arp_types.vhd",
+          "arp.vhd",
+          "axi2xgmii.vhd",
+          "axi_types.vhd",
+          "xgmii2axi.vhd",
+          "xUDP_Common_pkg.vhdl" ]
