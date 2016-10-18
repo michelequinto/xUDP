@@ -37,7 +37,7 @@ use work.xUDP_Common_pkg.all;
 
 entity xgmii2axi is
     generic (
-      CHANGE_EDIANESS : natural := 1 );
+      CHANGE_EDIANESS : boolean := true );
     
     port (
       pkt_rx_val                : in std_logic;
@@ -56,17 +56,39 @@ end xgmii2axi;
 architecture rtl of xgmii2axi is
   
 begin
+
+  do_not_change_endianess : if not CHANGE_EDIANESS generate
+    
+    axi4.tdata <= pkt_rx_data;
+    
+    with pkt_rx_mod select axi4.tkeep <= "11111111" when "000",
+                                         "00000011" when "010",   
+                                         "00000111" when "011",   
+                                         "00001111" when "100",   
+                                         "00011111" when "101",
+                                         "00111111" when "110",
+                                         "01111111" when "111",
+                                         "XXXXXXXX" when others;
+  end generate;
+
+  change_endianess : if CHANGE_EDIANESS generate
+
+    bytes_mingling : for i in 0 to axi4.tdata'length/8-1 generate
+      axi4.tdata(8*i-1 downto i*8) <= pkt_rx_data(pkt_rx_data'length-1-8*i downto pkt_rx_data'length-8*(i+1));
+    end generate;
+
+    with pkt_rx_mod select axi4.tkeep <= "11111111" when "000",
+                                         "11000000" when "010",
+                                         "11100000" when "011",
+                                         "11110000" when "100",
+                                         "11111000" when "101",
+                                         "11111100" when "110",
+                                         "11111110" when "111",
+                                         "XXXXXXXX" when others;
+                              
+  end generate;
   
-  axi4.tdata <= pkt_rx_data;
   axi4.tvalid <= pkt_rx_val;
   axi4.tlast <=  pkt_rx_eop;
-
-  with pkt_rx_mod select axi4.tkeep <= "11111111" when "000",
-                                       "00000011" when "010",
-                                       "00000111" when "011",
-                                       "00001111" when "100",
-                                       "00011111" when "101",
-                                       "00111111" when "110",
-                                       "01111111" when "111",
-                                       "XXXXXXXX" when others; 
+  
 end rtl;
