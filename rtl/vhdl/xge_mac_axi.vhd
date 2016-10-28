@@ -35,7 +35,7 @@ use work.xUDP_Common_pkg.all;
 
 entity xge_mac_axi is
     generic (
-      CHANGE_EDIANESS : boolean := true );
+      CHANGE_EDIANESS : boolean := false );
     port (
 	  xgmii_rxd           : in std_logic_vector(63 downto 0);
 	  xgmii_rxc           : in std_logic_vector(7 downto 0);
@@ -167,7 +167,7 @@ signal frame_started       : std_logic := '0';
                pkt_rx_err 	=> pkt_rx_err,
                pkt_rx_eop 	=> pkt_rx_eop ,
                pkt_rx_data 	=> pkt_rx_data ,
-               pkt_rx_avail 	=> open,
+               pkt_rx_avail 	=> pkt_rx_avail,
                pkt_tx_val 	=> pkt_tx_val,
                pkt_tx_sop 	=> pkt_tx_sop,
                pkt_tx_mod 	=> pkt_tx_mod,
@@ -177,10 +177,10 @@ signal frame_started       : std_logic := '0';
 
      
 
-  do_not_change_endianess : if not CHANGE_EDIANESS generate
+  do_not_change_endianess : if (not CHANGE_EDIANESS) generate
     
     axi_rx.tdata <= pkt_rx_data;
-    
+   
     with pkt_rx_mod select axi_rx.tkeep <= "11111111" when "000",
                                            "00000011" when "010",   
                                            "00000111" when "011",   
@@ -233,20 +233,23 @@ signal frame_started       : std_logic := '0';
 
   generate_rx_tvalid : process(clk_156m25)
   begin
-    if pkt_rx_sop = '1' then
-      frame_started <= '1';       
-    elsif (pkt_rx_eop and frame_started) = '1' then
-      frame_started <= '0';
+    if rising_edge(clk_156m25) then
+      if pkt_rx_sop = '1' then
+        frame_started <= '1';       
+      elsif (pkt_rx_eop and frame_started) = '1' then
+        frame_started <= '0';
+      end if;
     end if;
+         
   end process;
                      
   with axi_rx_tvalid_i select axi_rx.tlast <= pkt_rx_eop when '1',
                                             'X' when others;
 
   axi_tx_tready <= not pkt_tx_full;
-  axi_rx_tvalid_i <= frame_started or pkt_rx_sop;
   axi_rx.tvalid <= axi_rx_tvalid_i;
-
+  axi_rx_tvalid_i <= frame_started or pkt_rx_sop;
+  
   pkt_rx_ren <= axi_rx_tready;
                              
   pkt_tx_val <= axi_tx.tvalid;

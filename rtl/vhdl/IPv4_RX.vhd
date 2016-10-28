@@ -92,13 +92,15 @@ architecture rtl  of IPv4_RX is
   signal frameCntCount          : std_logic;
   signal frameCntData           : std_logic_vector(cntLength-1 downto 0);
   
-  signal set_dest_ip            : std_logic := '0';
-  signal set_src_ip             : std_logic := '0';
+  signal set_ip_l               : std_logic := '0';
+  signal set_ip_h               : std_logic := '0';
 
-  constant OUR_IP_PROTOCOL      : std_logic_vector(15 downto 0) := x"0008";
-  alias protocol                : std_logic_vector(15 downto 0) is mac_rx.tdata(47 downto 32);
-  alias src_ip_addr             : std_logic_vector(31 downto 0) is mac_rx.tdata(31 downto 0);
-  alias dest_ip_addr            : std_logic_vector(31 downto 0) is mac_rx.tdata(63 downto 32);
+  constant OUR_IP_PROTOCOL      : std_logic_vector(15 downto 0) := x"0800";
+  constant OUR_HEADER           : std_logic_vector(7 downto 0) := x"45";
+  alias protocol                : std_logic_vector(15 downto 0) is mac_rx.tdata(31 downto 16);
+  alias src_ip_addr             : std_logic_vector(31 downto 0) is mac_rx.tdata(63 downto 32);
+  alias dest_ip_addr            : std_logic_vector(31 downto 0) is mac_rx.tdata(31 downto 0);
+  alias version_header          : std_logic_vector(7 downto 0) is mac_rx.tdata(15 downto 8);
 
   signal pkt_ignore             : std_logic;
   
@@ -109,8 +111,8 @@ begin  -- rtl
   begin
     wordCntRst          <= '0';
     frameCntCount       <= '0';
-    set_dest_ip         <= '0';
-    set_src_ip          <= '0';
+    set_ip_l            <= '0';
+    set_ip_h            <= '0';
     next_rx_state       <= rx_state;
     case rx_state is
       when IDLE =>
@@ -129,13 +131,13 @@ begin  -- rtl
             case wordCntData is
               when x"01" =>             --do nothing
               when x"02" =>
-                if protocol = OUR_IP_PROTOCOL then
-                  set_src_ip <= '1';
-                else
+                if protocol /= OUR_IP_PROTOCOL or version_header /= OUR_HEADER then
                   next_rx_state <= WAIT_END; 
                 end if;
-              when x"03" =>
-                set_dest_ip <= '1';
+              when x"04" =>
+                set_source_ip <= '1';
+              when x"05" =>
+                set_dest_ip_l <= '1';
                 next_rx_state <= USER_DATA;
               when others =>            -- do nothing
             end case;
