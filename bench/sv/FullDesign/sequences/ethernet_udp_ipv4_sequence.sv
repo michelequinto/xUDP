@@ -59,23 +59,26 @@ task ethernet_udp_ipv4_sequence::body();
 				    udp.hlen == 5;
 				    udp.flag == 0;
 				    udp.identification == 0;
+				    udp.fragmentation_offset == 0;
+				    udp.time_to_live == 0;
+				    udp.header_checksum == 16'hBAC1;
 				    //mac
-				    /*
-				    src_address[0] == 8'h01;
-				    dest_address[0] == 8'h11;
-				    src_address[1] == 8'h00;
-				    dest_address[1] == 8'h00;
-				    */
 				    
-				    src_address[2] == 8'hee;
-				    dest_address[2] == 8'hee;
-				    src_address[3] == 8'h00;
-				    dest_address[3] == 8'h00;
+				    //src_address[0] == 8'hFF;
+				    //dest_address[0] == 8'h11;
+				    src_address[1] == 8'h02;
+				    //dest_address[1] == 8'h00;
 				    
-				    src_address[4] == 8'hff;
-				    dest_address[4] == 8'hff;
-				    src_address[5] == 8'h10;
-				    dest_address[5] == 8'h10;
+				    
+				    src_address[2] == 8'h03;
+				    dest_address[2] == 8'h01;
+				    src_address[3] == 8'h04;
+				    dest_address[3] == 8'h01;
+				    
+				    src_address[4] == 8'h05;
+				    dest_address[4] == 8'h01;
+				    src_address[5] == 8'h06;
+				    dest_address[5] == 8'h01;
 				    
 				    //ip address
 				    udp.source_ip_address == 32'h10_00_00_01;
@@ -86,7 +89,7 @@ task ethernet_udp_ipv4_sequence::body();
 				    
 				    udp.tx_error == 1'b0 ; 
 				    udp.tx_error_on_cycle == 0 ;
-				    udp.length == 16'h00_0c; }) `uvm_error("ASSERT_FAILURE","Assert statement failure");
+				    udp.length == 16'h00_20; }) `uvm_error("ASSERT_FAILURE","Assert statement failure");
 
 	finish_item(udp);  
         `uvm_info("ID", "Finish item UDP", UVM_NONE);

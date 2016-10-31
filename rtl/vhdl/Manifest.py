@@ -1,4 +1,5 @@
 files = [ "utilities.vhd",
+          "axi_tx_crossbar.vhd",
           "arp_REQ.vhd",
           "arp_RX.vhd",
           "arp_STORE_br.vhd",

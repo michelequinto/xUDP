@@ -16,6 +16,8 @@ package axi_types is
         tlast       : std_logic;                    -- indicates last data in frame
         tkeep       : std_logic_vector(7 downto 0); -- which of last is valid (bit 0 == 0..7)
     end record;
+
+    type axi_in_t is array (natural range <>) of axi4_dvlk64_t;
  
     function empty_axi4_dvlk64 return axi4_dvlk64_t;
 
@@ -32,6 +34,5 @@ package body axi_types is
         axi.tkeep := (others => '0');
         return axi;
     end empty_axi4_dvlk64;
-
 
 end axi_types;

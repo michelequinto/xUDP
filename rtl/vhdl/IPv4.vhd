@@ -32,6 +32,7 @@ use IEEE.NUMERIC_STD.ALL;
 use work.axi_types.all;
 use work.ipv4_types.all;
 use work.arp_types.all;
+use work.xUDP_Common_pkg.all;
  
 entity IPv4 is
     port (
@@ -46,8 +47,8 @@ entity IPv4 is
       rx_clk					: in STD_LOGIC;
       tx_clk					: in STD_LOGIC;
       reset 					: in STD_LOGIC;
-      our_ip_address 		                : in STD_LOGIC_VECTOR (31 downto 0);
-      our_mac_address 		                : in std_logic_vector (47 downto 0);
+      udp_conf                                  : xUDP_CONIGURATION_T;
+
       -- system status signals
       rx_pkt_count	        		: out STD_LOGIC_VECTOR(7 downto 0);		-- number of IP pkts received for uses
       -- ARP lookup signals
@@ -86,9 +87,13 @@ begin
     ip_rx_start         => ip_rx_start,
     clk 	        => rx_clk,
     rst 	        => reset,
-    our_ip_address	=> our_ip_address,
+    our_ip_address	=> udp_conf.ip_address,
     rx_pkt_count	=> rx_pkt_count,
     mac_rx 	        => mac_rx
     );
 
+  mac_tx.tvalid <= '0';
+  mac_tx.tdata <= (others => 'X');
+  mac_tx.tlast <= '0';
+    
 end structural;

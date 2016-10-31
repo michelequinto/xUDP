@@ -53,9 +53,10 @@ entity IPv4_Complete_nomac is
       rx_clk				: in  STD_LOGIC;
       tx_clk				: in  STD_LOGIC;
       reset 				: in  STD_LOGIC;
-      our_ip_address 		        : in  std_logic_vector (31 downto 0);
-      our_mac_address 		        : in  std_logic_vector (47 downto 0);
+
+      udp_conf                          : xUDP_CONIGURATION_T;
       control				: in udp_control_type;
+
       -- status signals
       arp_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- count of arp pkts received
       ip_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- number of IP pkts received for us
@@ -111,8 +112,9 @@ architecture structural of IPv4_Complete_nomac is
       rx_clk					: in std_logic;
       tx_clk					: in std_logic;
       reset 					: in std_logic;
-      our_ip_address 		                : in std_logic_vector(31 downto 0);
-      our_mac_address 		                : in std_logic_vector(47 downto 0);
+
+      udp_conf                                  : xUDP_CONIGURATION_T;
+      
       -- system status signals
       rx_pkt_count	        		: out std_logic_vector(7 downto 0);		-- number of IP pkts received for uses
       -- ARP lookup signals
@@ -127,6 +129,21 @@ architecture structural of IPv4_Complete_nomac is
       );
 end component;
 
+component axi_tx_crossbar
+  generic (
+    N_PORTS			: integer := 2
+    );
+  port (
+      clk                       : in std_logic;
+      rst                       : in std_logic;        
+      
+      axi_in_tready             : out std_logic_vector(N_PORTS-1 downto 0);
+      axi_in                    : in axi_in_t(N_PORTS-1 downto 0);
+      axi_out                   : out axi4_dvlk64_t;
+      axi_out_tready            : in std_logic
+    );
+end component;
+
 -------------------------------------------------------------------------------
 -- Signal declaration
 -------------------------------------------------------------------------------
@@ -135,10 +152,15 @@ signal arp_req_req_int    : arp_req_req_type;
 signal arp_req_rslt_int   : arp_req_rslt_type;
 signal ip_mac_req         : std_logic;
 signal ip_mac_grant       : std_logic;
+signal udp_clk            : xUDP_CLOCK_T;
+signal arp_control        : arp_control_type;
+
+signal ip_mac_tready, arp_mac_tready    : std_logic;
+signal ip_mac_tx, arp_mac_tx            : axi4_dvlk64_t;
 
 begin
   
-  IP_layer : IPv4 port map
+  ip_layer_inst : IPv4 port map
     (
       rx_clk               => rx_clk,
       tx_clk               => tx_clk,
@@ -150,16 +172,51 @@ begin
       ip_tx_data_out_ready => ip_tx_data_out_ready,
       ip_rx_start          => ip_rx_start,
       ip_rx                => ip_rx,
-      
-      our_ip_address       => our_ip_address,
-      our_mac_address      => our_mac_address,
+      udp_conf             => udp_conf,
       rx_pkt_count         => ip_pkt_count,
       arp_req_req          => arp_req_req_int,
       arp_req_rslt         => arp_req_rslt_int,
       mac_tx_req           => ip_mac_req,
       mac_tx_granted       => ip_mac_grant,
-      mac_tx               => mac_tx,
+      mac_tx               => ip_mac_tx,
       mac_rx               => mac_rx
-      ); 
+      );
+
+  arp_layer_inst : arp port map (
+     
+      arp_req_req         => arp_req_req_int,
+      arp_req_rslt        => arp_req_rslt_int,
+     
+      data_in             => mac_rx, 
+     
+      mac_tx_req          => open, 
+      mac_tx_granted      => '0',
+      data_out_ready      => arp_mac_tready, 
+      data_out            => arp_mac_tx,
+  
+      cfg                 => udp_conf,
+      control             => arp_control,
+      req_count           => open,
+      clks                => udp_clk
+    );
+
+  arp_control <= control.ip_controls.arp_controls;
+  
+  udp_clk.rx_clk <= rx_clk;
+  udp_clk.rx_reset <= reset;
+  udp_clk.tx_clk <= tx_clk;
+  udp_clk.tx_reset <= reset;
+
+  axi_tx_crossbar_inst : axi_tx_crossbar port map (
+      clk                  => tx_clk,
+      rst                  => reset,        
+      
+      axi_in_tready(0)     => ip_mac_tready,
+      axi_in_tready(1)     => arp_mac_tready,
+      axi_in(0)            => ip_mac_tx,
+      axi_in(1)            => arp_mac_tx,
+      axi_out              => mac_tx,
+      axi_out_tready       => '1'
+    );
 
 end structural;
