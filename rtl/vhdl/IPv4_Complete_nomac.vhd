@@ -49,12 +49,11 @@ entity IPv4_Complete_nomac is
       ip_tx_data_out_ready	        : out std_logic;									-- indicates IP TX is ready to take data
       ip_rx_start			: out std_logic;								   -- indicates receipt of ip frame.
       ip_rx				: out ipv4_rx_type;
-      -- system signals
-      rx_clk				: in  STD_LOGIC;
-      tx_clk				: in  STD_LOGIC;
-      reset 				: in  STD_LOGIC;
 
-      udp_conf                          : xUDP_CONIGURATION_T;
+      -- clock
+      clk                               : in xUDP_CLOCK_T;
+
+      udp_conf                          : in xUDP_CONIGURATION_T;
       control				: in udp_control_type;
 
       -- status signals
@@ -108,11 +107,9 @@ architecture structural of IPv4_Complete_nomac is
       ip_tx_data_out_ready	                : out std_logic;				-- indicatess IP TX is ready to take data
       ip_rx_start				: out std_logic;				-- indicates receipt of ip frame.
       ip_rx					: out ipv4_rx_type;
-      -- system control signals
-      rx_clk					: in std_logic;
-      tx_clk					: in std_logic;
-      reset 					: in std_logic;
-
+      -- clock
+      clk                                       : in xUDP_CLOCK_T;
+      -- udp conf
       udp_conf                                  : xUDP_CONIGURATION_T;
       
       -- system status signals
@@ -162,10 +159,8 @@ begin
   
   ip_layer_inst : IPv4 port map
     (
-      rx_clk               => rx_clk,
-      tx_clk               => tx_clk,
-      reset                => reset,
       
+      clk                  => clk, 
       ip_tx_start          => ip_tx_start,
       ip_tx                => ip_tx,
       ip_tx_result         => ip_tx_result,
@@ -197,19 +192,14 @@ begin
       cfg                 => udp_conf,
       control             => arp_control,
       req_count           => open,
-      clks                => udp_clk
+      clks                => clk
     );
 
   arp_control <= control.ip_controls.arp_controls;
   
-  udp_clk.rx_clk <= rx_clk;
-  udp_clk.rx_reset <= reset;
-  udp_clk.tx_clk <= tx_clk;
-  udp_clk.tx_reset <= reset;
-
   axi_tx_crossbar_inst : axi_tx_crossbar port map (
-      clk                  => tx_clk,
-      rst                  => reset,        
+      clk                  => clk.tx_clk,
+      rst                  => clk.tx_reset,    
       
       axi_in_tready(0)     => ip_mac_tready,
       axi_in_tready(1)     => arp_mac_tready,
