@@ -37,12 +37,13 @@ use work.xUDP_Common_pkg.all;
 entity IPv4 is
     port (
       -- IP Layer signals
-      ip_tx_start				: in std_logic;
-      ip_tx					: in ipv4_tx_type;				-- IP tx cxns
-      ip_tx_result		        	: out std_logic_vector (1 downto 0);		-- tx status (changes during transmission)
-      ip_tx_data_out_ready	                : out std_logic;				-- indicatess IP TX is ready to take data
-      ip_rx_start				: out std_logic;				-- indicates receipt of ip frame.
-      ip_rx					: out ipv4_rx_type;
+      ip_tx_start			        : in std_logic;
+      ip_tx				        : in ipv4_tx_type;
+      ip_tx_result			        : out std_logic_vector (1 downto 0);
+      ip_tx_tready	                        : out std_logic;									
+      ip_rx_start			        : out std_logic;
+      ip_rx			        	: out ipv4_rx_type;
+      ip_rx_tready                              : in std_logic;
    
       -- clock
       clk                                       : in xUDP_CLOCK_T;
@@ -54,12 +55,11 @@ entity IPv4 is
       -- ARP lookup signals
       arp_req_req				: out arp_req_req_type;
       arp_req_rslt		        	: in arp_req_rslt_type;
-      -- MAC layer RX signals
+      -- MAC layer signals
       mac_rx     			        : in axi4_dvlk64_t;
-      -- MAC layer TX signals
-      mac_tx_req				: out std_logic;				-- indicates that ip wants access to channel (stays up for as long as tx)
-      mac_tx_granted			        : in std_logic;					-- indicatess that access to channel has been granted		
-      mac_tx                                    : out axi4_dvlk64_t
+      mac_rx_tready                             : out std_logic;
+      mac_tx                                    : out axi4_dvlk64_t;
+      mac_tx_tready                             : in std_logic
       );
 end IPv4;
  
@@ -70,13 +70,15 @@ architecture structural of IPv4 is
     -- IP Layer signals
     ip_rx                       : out ipv4_rx_type;
     ip_rx_start                 : out std_logic;                        -- indicates receipt of ip frame.
+    ip_rx_tready                : in std_logic; 
     -- system signals
     clk                         : in  std_logic;                        -- same clock used to clock mac data and ip data
     rst                         : in  std_logic;
     our_ip_address              : in  std_logic_vector (31 downto 0);
     rx_pkt_count                : out std_logic_vector(7 downto 0);     -- number of IP pkts received for us
     -- MAC layer RX signals
-    mac_rx                      : in axi4_dvlk64_t
+    mac_rx                      : in axi4_dvlk64_t;
+    mac_rx_tready               : out std_logic
     );
   end component;
 
@@ -86,7 +88,7 @@ architecture structural of IPv4 is
     ip_tx_start			: in std_logic;
     ip_tx			: in ipv4_tx_type;		        -- IP tx cxns
     ip_tx_result		: out std_logic_vector (1 downto 0);    -- tx statuss (changes during transmission)
-    ip_tx_data_out_ready	: out std_logic;			-- indicates IP TX is ready to take data
+    ip_tx_tready	        : out std_logic;			-- indicates IP TX is ready to take data
     -- clock
     clk                         : xUDP_CLOCK_T;
     -- udp confs
@@ -95,7 +97,8 @@ architecture structural of IPv4 is
     arp_req_req			: out arp_req_req_type;
     arp_req_rslt		: in arp_req_rslt_type;
     -- MAC layer TX signals
-    mac_tx                      : out axi4_dvlk64_t
+    mac_tx                      : out axi4_dvlk64_t;
+    mac_tx_tready               : in std_logic
     );                  
 
 end component;
@@ -105,23 +108,26 @@ begin
   RX : IPv4_RX port map (
     ip_rx 	        => ip_rx,
     ip_rx_start         => ip_rx_start,
+    ip_rx_tready        => ip_rx_tready,
     clk 	        => clk.rx_clk,
     rst 	        => clk.rx_reset,
     our_ip_address	=> udp_conf.ip_address,
     rx_pkt_count	=> rx_pkt_count,
-    mac_rx 	        => mac_rx
+    mac_rx 	        => mac_rx,
+    mac_rx_tready       => mac_rx_tready
     );
 
   TX : IPv4_TX port map (
     ip_tx_start	        => ip_tx_start,
     ip_tx	        => ip_tx,
     ip_tx_result        => ip_tx_result,
-    ip_tx_data_out_ready => ip_tx_data_out_ready,
+    ip_tx_tready        => ip_tx_tready,
     clk                 => clk,
     udp_conf            => udp_conf,
     arp_req_req         => arp_req_req,
     arp_req_rslt        => arp_req_rslt,
-    mac_tx              => mac_tx 
+    mac_tx              => mac_tx,
+    mac_tx_tready       => mac_tx_tready
 );
     
 end structural;

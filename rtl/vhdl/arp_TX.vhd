@@ -184,6 +184,7 @@ begin
 
         when WAIT_MAC =>
             tx_count_mode <= RST;
+            data_out.tvalid <= '1';
             if mac_tx_granted = '1' then
                 next_tx_state <= SEND;
             end if;

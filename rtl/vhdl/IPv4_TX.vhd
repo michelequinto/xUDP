@@ -41,7 +41,7 @@ entity IPv4_TX is
     ip_tx_start			: in std_logic;
     ip_tx			: in ipv4_tx_type;		     
     ip_tx_result		: out std_logic_vector (1 downto 0); 
-    ip_tx_data_out_ready	: out std_logic;
+    ip_tx_tready	        : out std_logic;
     -- clock
     clk                         : in xUDP_CLOCK_T;
     -- udp confs
@@ -50,58 +50,75 @@ entity IPv4_TX is
     arp_req_req			: out arp_req_req_type;
     arp_req_rslt		: in arp_req_rslt_type;
     -- MAC layer TX signals
-    mac_tx                      : out axi4_dvlk64_t
+    mac_tx                      : out axi4_dvlk64_t;
+    mac_tx_tready               : in std_logic
     );                  
 
 end IPv4_TX;
+
+-- IP datagram header format
+--
+--      0          4          8                      16      19             24                    31
+--      --------------------------------------------------------------------------------------------
+--      | Version  | *Header  |    Service Type      |        Total Length including header        |
+--      |   (4)    |  Length  |     (ignored)        |                 (in bytes)                  |
+--      --------------------------------------------------------------------------------------------
+--      |           Identification                   | Flags |       Fragment Offset               |
+--      |                                            |       |      (in 32 bit words)              |
+--      --------------------------------------------------------------------------------------------
+--      |    Time To Live     |       Protocol       |             Header Checksum                 |
+--      |     (ignored)       |                      |                                             |
+--      --------------------------------------------------------------------------------------------
+--      |                                   Source IP Address                                      |
+--      |                                                                                          |
+--      --------------------------------------------------------------------------------------------
+--      |                                 Destination IP Address                                   |
+--      |                                                                                          |
+--      --------------------------------------------------------------------------------------------
+--      |                          Options (if any - ignored)               |       Padding        |
+--      |                                                                   |      (if needed)     |
+--      --------------------------------------------------------------------------------------------
+--      |                                          Data                                            |
+--      |                                                                                          |
+--      --------------------------------------------------------------------------------------------
+--      |                                          ....                                            |
+--      |                                                                                          |
+--      --------------------------------------------------------------------------------------------
+--
+-- * - in 32 bit words
+-- 
 
 architecture rtl of IPv4_TX is 
 
   type tx_state_type is (
     IDLE,
-    WAIT_MAC,                           -- waiting for response from ARP for mac lookup
-    WAIT_CHN,                           -- waiting for tx access to MAC channel
-    SEND_ETH_HDR,                       -- sending the ethernet header
-    SEND_IP_HDR,                        -- sending the IP header
-    SEND_USER_DATA                      -- sending the users data
+    GET_MAC,                            -- waiting for response from ARP for mac lookup
+    SEND_HDR,                           -- sending the ethernet/IP header
+    SEND_USR_DATA                       -- sending the users data
   );
 
-  type count_mode_type is (RST, INCR, HOLD);
-  type settable_cnt_type is (RST, SET, INCR, HOLD);
-  type set_clr_type is (SET, CLR, HOLD);
+  constant cntLength            : integer := 12;    -- length of counters
+  signal wordCntCount           : std_logic;
+  signal wordCntRst             : std_logic;
+  signal wordCntData            : std_logic_vector(cntLength-1 downto 0);
 
   -- Configuration
   constant IP_TTL               : std_logic_vector (7 downto 0) := x"80";
 
   -- TX state variables
   signal tx_state, next_tx_state : tx_state_type;
-  signal tx_count               : unsigned (11 downto 0);
-  signal tx_result_reg          : std_logic_vector (1 downto 0);
-  signal tx_mac                 : std_logic_vector (47 downto 0);
-  signal tx_mac_chn_reqd        : std_logic;
-  signal tx_hdr_cks             : std_logic_vector (23 downto 0);
-  signal mac_lookup_req         : std_logic;
-  signal arp_req_ip_reg         : std_logic_vector (31 downto 0);
-  signal mac_data_out_ready_reg : std_logic;
-
-  signal set_tx_state           : std_logic;
-  signal next_tx_result         : std_logic_vector (1 downto 0);
-  signal set_tx_result          : std_logic;
-  signal tx_mac_value           : std_logic_vector (47 downto 0);
-  signal set_tx_mac             : std_logic;
-  signal tx_count_val           : unsigned (11 downto 0);
-  signal tx_count_mode          : settable_cnt_type;
-  signal tx_data                : std_logic_vector (7 downto 0);
-  signal set_last               : std_logic;
-  signal set_chn_reqd           : set_clr_type;
-  signal set_mac_lku_req        : set_clr_type;
-  signal tx_data_valid          : std_logic;
 
   signal total_length           : std_logic_vector (15 downto 0);
-  signal packet_type            : std_logic_vector (15 downto 0);
+  signal set_tx_mac             : std_logic;
+  signal tx_mac, tx_mac_reg     : std_logic_vector(47 downto 0) := (others => '0');
+  signal mac_lookup_req_i       : std_logic;
+
+  signal hdr_checksum           : std_logic_vector(15 downto 0) := (others => '1');
 
 begin  -- rtl
 
+  total_length <= std_logic_vector(unsigned(ip_tx.hdr.data_length) + 20);      
+  
   tx_sequential : process (clk.tx_clk, clk.tx_reset)
   begin
     if clk.tx_reset = '1' then
@@ -111,48 +128,97 @@ begin  -- rtl
     end if;     
   end process;
 
-  --tx_comb : process(tx_state)
-  --begin
-  --  ip_tx_data_out_ready <= '0';
-  --  case tx_state is
-  --    when IDLE =>
-  --      if ip_tx_start = '1' then
-  --        if unsigned(ip_tx.hdr.data_length) > MAX_IP_PAYLOAD_LENGTH then -- 1480 then
-  --          next_tx_result <= IPTX_RESULT_ERR;
-  --          set_tx_result  <= '1';
-  --        else
-  --          next_tx_result <= IPTX_RESULT_SENDING;
-            
-  --          if ip_tx.hdr.dst_ip_addr = IP_BC_ADDR then
-  --            tx_mac_value  <= MAC_BC_ADDR;
-  --            set_tx_mac    <= '1';
-  --            next_tx_state <= WAIT_CHN;
-  --            set_tx_state  <= '1';
-  --          else
-  --                                      -- need to req the mac address for this ip
-  --            set_mac_lku_req <= SET;
-  --            next_tx_state   <= WAIT_MAC;
-  --            set_tx_state    <= '1';
-  --          end if;
-  --        end if;
-  --      else
-  --        set_mac_lku_req <= CLR;
-  --      end if;
-  --    when WAIT_MAC => null;
-        
-  --    when WAIT_CHN =>
-  --      if mac_tx_granted = '1' then
-  --        next_tx_state <= SEND_ETH_HDR;
-  --        set_tx_state  <= '1';
-  --      end if;
-        
-  --    when others => null;
-  --  end case;
-    
-  --end process;
-  
-  mac_tx.tvalid <= '0';
-  mac_tx.tdata <= (others => 'X');
-  mac_tx.tlast <= '0';
+  tx_comb : process(tx_state, wordCntData,
+                    ip_tx_start, mac_tx_tready,
+                    arp_req_rslt.got_mac, ip_tx.data.tvalid)
+  begin
+    wordCntRst          <= '1';
+    wordCntCount        <= '0';
+    ip_tx_tready        <= '0';
+    set_tx_mac          <= '0';
+    tx_mac              <= (others => 'X');
+    mac_lookup_req_i    <= '0';
+    mac_tx.tvalid       <= '0';
+    mac_tx.tdata        <= (others => 'X');
+    mac_tx.tlast        <= '0';
+    ip_tx_tready        <= '0';
+    case tx_state is
+      when IDLE =>
+        if ip_tx_start = '1' then
+          if unsigned(ip_tx.hdr.data_length) <= MAX_IP_PAYLOAD_LENGTH then -- 1480 then
+            if ip_tx.hdr.dst_ip_addr = IP_BC_ADDR then
+              tx_mac <= MAC_BC_ADDR;
+              set_tx_mac <= '1';
+              next_tx_state <= SEND_HDR;
+            else
+              mac_lookup_req_i <= '1';
+              next_tx_state <= GET_MAC;
+            end if;
+          end if;
+        end if;
+      when GET_MAC =>
+        if arp_req_rslt.got_mac = '1' then
+           tx_mac <= arp_req_rslt.mac;
+           set_tx_mac <= '1';
+           next_tx_state <= SEND_HDR;
+        end if;
+      when SEND_HDR =>
+        wordCntRst <= '0';
+        if mac_tx_tready = '1' then
+          wordCntCount <= '1';
+          mac_tx.tvalid <= '1';
+          mac_tx.tlast <= '0';
+          mac_tx.tkeep <= (others => '1');
+          case wordCntData is
+            when x"001" => -- send MAC
+              mac_tx.tdata <= ( tx_mac_reg & udp_conf.mac_address(47 downto 32) );
+            when x"002" => -- send MAC 
+              mac_tx.tdata <= ( udp_conf.mac_address(31 downto 0) & IPV4_FRAME_TYPE & x"4500" );       
+            when x"003" => -- length & flags
+              mac_tx.tdata <= ( total_length & x"00000000" & IP_TTL & ip_tx.hdr.protocol);
+            when x"004" => -- IP
+              mac_tx.tdata <= ( hdr_checksum & udp_conf.ip_address & ip_tx.hdr.dst_ip_addr(31 downto 16) );
+            when x"005" => -- IP
+              mac_tx.tdata <= ( ip_tx.hdr.dst_ip_addr(15 downto 0) & x"000000000000" ); 
+              next_tx_state <= SEND_USR_DATA;       
+            when others => null;
+          end case;
+        end if; 
+      when SEND_USR_DATA =>
+        ip_tx_tready <= mac_tx_tready;
+        mac_tx.tvalid <= ip_tx.data.tvalid;
+        mac_tx.tlast <= ip_tx.data.tlast;
+        mac_tx.tkeep <= ip_tx.data.tkeep;
+        if ip_tx.data.tvalid = '1' then
+          wordCntCount <= '1';
+          if ip_tx.data.tlast = '1' then
+            next_tx_state <= IDLE;
+          end if;
+        end if; 
+      when others => null;
+    end case;
+  end process;
 
+  latch_mac : process(clk.tx_clk)
+  begin
+    if rising_edge(clk.tx_clk) then
+      if set_tx_mac = '1' then
+        tx_mac_reg <= tx_mac;   
+      end if;
+    end if;
+  end process;
+
+  word_cnt : entity work.counter
+    generic map ( length => cntLength,
+                  preset => 1 )
+    port map (
+      clk  => clk.tx_clk,
+      rst  => wordCntRst,
+      data => wordCntData,
+      cnt  => wordCntCount );
+
+  -- set arp signals
+  arp_req_req.lookup_req <= mac_lookup_req_i;
+  arp_req_req.ip <= ip_tx.hdr.dst_ip_addr;
+  
 end rtl;

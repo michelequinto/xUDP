@@ -8,10 +8,11 @@ add wave -noupdate -expand -group {Top Transactions} {/top/xaui/idle[1]}
 add wave -noupdate -expand -group {Top Transactions} {/top/xaui/fault_sequence[1]}
 add wave -noupdate -expand -group {Top Transactions} {/top/xaui/data_frame[1]}
 add wave -noupdate -expand -group {Top Transactions} {/top/xaui/control_frame[1]}
-add wave -noupdate -group {Sub Transactions} {/top/xaui/start_preamble_phase[0]}
-add wave -noupdate -group {Sub Transactions} {/top/xaui/preamble_sfd_phase_10g[0]}
-add wave -noupdate -group {Sub Transactions} {/top/xaui/start_preamble_phase[1]}
-add wave -noupdate -group {Sub Transactions} {/top/xaui/preamble_sfd_phase_10g[1]}
+add wave -noupdate -expand -group {Sub Transactions} /top/xaui/ipv4_frame
+add wave -noupdate -expand -group {Sub Transactions} {/top/xaui/start_preamble_phase[0]}
+add wave -noupdate -expand -group {Sub Transactions} {/top/xaui/preamble_sfd_phase_10g[0]}
+add wave -noupdate -expand -group {Sub Transactions} {/top/xaui/start_preamble_phase[1]}
+add wave -noupdate -expand -group {Sub Transactions} {/top/xaui/preamble_sfd_phase_10g[1]}
 add wave -noupdate -group xaui /top/xaui/iclk_0
 add wave -noupdate -group xaui /top/xaui/iclk_1
 add wave -noupdate -group xaui /top/xaui/ian_clk_0
@@ -326,118 +327,188 @@ add wave -noupdate -group xaui_inst /top/xudp/XAUI_MANAGMENT_BLOCK/xaui_inst/mgt
 add wave -noupdate -group xaui_inst /top/xudp/XAUI_MANAGMENT_BLOCK/xaui_inst/mgt_txreset
 add wave -noupdate -group xaui_inst /top/xudp/XAUI_MANAGMENT_BLOCK/xaui_inst/resetdone
 add wave -noupdate -group xaui_inst /top/xudp/XAUI_MANAGMENT_BLOCK/xaui_inst/tx_sync_done
-add wave -noupdate -expand -group xge_mac_inst -group clks /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/clk_156m25
-add wave -noupdate -expand -group xge_mac_inst -group clks /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/clk_xgmii_rx
-add wave -noupdate -expand -group xge_mac_inst -group clks /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/clk_xgmii_tx
-add wave -noupdate -expand -group xge_mac_inst -group clks /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/local_fault_msg_det
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_adr_i
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_clk_i
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_cyc_i
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_dat_i
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_rst_i
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_stb_i
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_we_i
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_ack_o
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_dat_o
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/wb_int_o
-add wave -noupdate -expand -group xge_mac_inst -group whisbone_itf {/top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/xgmii_txd[60]}
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_ren
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_avail
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_data
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_eop
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_err
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_mod
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_sop
-add wave -noupdate -expand -group xge_mac_inst -group user_rx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_rx_val
-add wave -noupdate -expand -group xge_mac_inst -group user_tx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_tx_full
-add wave -noupdate -expand -group xge_mac_inst -group user_tx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_tx_data
-add wave -noupdate -expand -group xge_mac_inst -group user_tx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_tx_eop
-add wave -noupdate -expand -group xge_mac_inst -group user_tx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_tx_mod
-add wave -noupdate -expand -group xge_mac_inst -group user_tx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_tx_sop
-add wave -noupdate -expand -group xge_mac_inst -group user_tx /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/pkt_tx_val
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/xgmii_rxc
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/xgmii_rxd
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/xgmii_txc
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/xgmii_txd
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/clear_stats_rx_octets
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/clear_stats_rx_pkts
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/clear_stats_tx_octets
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/clear_stats_tx_pkts
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/ctrl_tx_enable
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/ctrl_tx_enable_ctx
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/remote_fault_msg_det
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_ralmost_empty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_rdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_rempty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_ren
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_rstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_wdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_wen
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_wfull
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxdfifo_wstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_ralmost_empty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_rdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_rempty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_ren
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_rstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_wdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_wen
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxhfifo_wstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxsfifo_wdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/rxsfifo_wen
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/stats_rx_octets
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/stats_rx_pkts
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/stats_tx_octets
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/stats_tx_pkts
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_crc_error
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_crc_error_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_fragment_error
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_fragment_error_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_lenght_error
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_lenght_error_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_local_fault
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_local_fault_crx
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_local_fault_ctx
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_pause_frame_rx
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_pause_frame_rx_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_remote_fault
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_remote_fault_crx
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_remote_fault_ctx
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_rxdfifo_ovflow
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_rxdfifo_ovflow_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_rxdfifo_udflow
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_rxdfifo_udflow_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_txdfifo_ovflow
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_txdfifo_ovflow_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_txdfifo_udflow
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/status_txdfifo_udflow_tog
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_ralmost_empty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_rdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_rempty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_ren
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_rstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_walmost_full
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_wdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_wen
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_wfull
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txdfifo_wstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_ralmost_empty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_rdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_rempty
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_ren
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_rstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_walmost_full
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_wdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_wen
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_wfull
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txhfifo_wstatus
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txsfifo_wdata
-add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_inst/txsfifo_wen
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/axi_tx
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/axi_tx_tready
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/axi_rx
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/axi_rx_tready
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_rx_sop
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_rx_val
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_rx_mod
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_rx_err
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_rx_eop
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_rx_data
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_rx_avail
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/axi_rx_tvalid_i
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/frame_started
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_tx_full
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_tx_val
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_tx_sop
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_tx_mod
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_tx_eop
+add wave -noupdate -expand -group xge_mac_inst /top/xudp/XGE_MANAGMENT_BLOCK/xge_mac_axi_inst/pkt_tx_data
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/ip_tx_start
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/ip_tx
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/ip_tx_result
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/ip_rx_start
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/ip_rx
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/control
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/arp_pkt_count
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/ip_pkt_count
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/mac_tx
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/mac_rx
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/arp_req_req_int
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/arp_req_rslt_int
+add wave -noupdate -group ip_inst /top/xudp/IP/ip_inst/ip_mac_req
+add wave -noupdate /top/xudp/IP/ip_inst/ip_mac_grant
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/ip_rx
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/ip_rx_start
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/clk
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/rst
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/our_ip_address
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/rx_pkt_count
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/mac_rx
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/rx_state
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/next_rx_state
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/wordCntCount
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/wordCntRst
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/wordCntData
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/frameCntCount
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/frameCntData
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/errCntCount
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/errCntData
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/set_src_ip
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/set_dest_ip_l
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/set_dest_ip_h
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/set_protocol
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/dest_ip_addr_i
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/rx_err_i
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/tkeep_i
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/tvalid_i
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/pkt_ignore
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/set_length
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/data_length
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/version_header
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/dest_ip_addr_l
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/dest_ip_addr_h
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/src_ip_addr
+add wave -noupdate -group ip_rx_inst /top/xudp/IP/ip_inst/ip_layer_inst/RX/protocol
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/ip_tx_start
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/ip_tx
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/ip_tx_result
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/ip_tx_tready
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/clk
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/udp_conf
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/arp_req_req
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/arp_req_rslt
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/mac_tx
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/mac_tx_tready
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/wordCntCount
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/wordCntRst
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/wordCntData
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/tx_state
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/next_tx_state
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/total_length
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/set_tx_mac
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/tx_mac
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/tx_mac_reg
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/mac_lookup_req_i
+add wave -noupdate -group ip_tx_inst /top/xudp/IP/ip_inst/ip_layer_inst/TX/hdr_checksum
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_req_req
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_req_rslt
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/data_in
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/mac_tx_req
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/mac_tx_granted
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/data_out_ready
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/data_out
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/cfg
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/control
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/req_count
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/clks
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_nwk_req_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/send_I_have_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_entry_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/send_who_has_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/ip_entry_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_store_req_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_store_result_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/nwk_result_status_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/recv_I_have_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_entry_for_I_have_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/recv_who_has_int
+add wave -noupdate -group arp_inst /top/xudp/IP/ip_inst/arp_layer_inst/arp_entry_for_who_has_int
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/clk
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/rst
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/axi_in_tready
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/axi_in
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/axi_out
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/axi_out_tready
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/st
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/n_st
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/sel_i
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/sel
+add wave -noupdate -group xbar_inst /top/xudp/IP/ip_inst/axi_tx_crossbar_inst/latch_sel
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/send_I_have
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/arp_entry
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/send_who_has
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/ip_entry
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/mac_tx_req
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/mac_tx_granted
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/data_out_ready
+add wave -noupdate -expand -group arp_tx_inst -expand /top/xudp/IP/ip_inst/arp_layer_inst/tx/data_out
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/cfg
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/clk
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/reset
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/tx_mac_chn_reqd
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/tx_state
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/tx_count
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/send_I_have_reg
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/send_who_has_reg
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/I_have_target
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/who_has_target
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/tx_mode
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/target
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/timer
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/next_tx_state
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/tx_mode_val
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/target_val
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/tx_count_mode
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/set_chn_reqd
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/set_send_I_have
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/set_send_who_has
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/set_tx_mode
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/set_target
+add wave -noupdate -expand -group arp_tx_inst /top/xudp/IP/ip_inst/arp_layer_inst/tx/set_timer
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/data_in
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/recv_who_has
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_entry_for_who_has
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/recv_I_have
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_entry_for_I_have
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/req_count
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/cfg
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/clk
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/reset
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/send_request_needed
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/tx_mac_chn_reqd
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/eop_reg
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/rx_state
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/rx_count
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_operation
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_req_count
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/new_arp_entry
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_err_data
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/set_err_data
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/next_rx_state
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/rx_count_mode
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/set_arp_oper
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_oper_set_val
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/count_arp_rcvd
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_save
+add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/set_eop
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {260722 ps} 0}
+WaveRestoreCursors {{Cursor 1} {2283638 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 271
-configure wave -valuecolwidth 100
+configure wave -valuecolwidth 190
 configure wave -justifyvalue left
 configure wave -signalnamewidth 1
 configure wave -snapdistance 10
@@ -450,4 +521,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {231095 ps}
+WaveRestoreZoom {0 ps} {2535960 ps}

@@ -4,13 +4,24 @@
  
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
+use IEEE.NUMERIC_STD.all;
 use work.axi_types.all;
 use work.arp_types.all;
  
 package ipv4_types is
+
+  constant ETH_MTU                      : unsigned := x"2328";  -- 1500 byte
+                                                               -- 9000 byte (x2328)jumboFrame 
+  constant UDP_HEADER_LENGTH            : unsigned := x"8";    -- 8 byte units
+  constant IP_HEADER_LENGTH             : unsigned := x"14";   -- 20 byte units
+  constant MAX_UDP_PAYLOAD_LENGTH       : unsigned := ETH_MTU - UDP_HEADER_LENGTH - IP_HEADER_LENGTH;
+  constant MAX_IP_PAYLOAD_LENGTH        : unsigned := ETH_MTU - IP_HEADER_LENGTH;
+  constant STD_IP_PAYLOAD_LENGTH        : unsigned := x"5DC" - IP_HEADER_LENGTH;
+  constant IPV4_FRAME_TYPE              : std_logic_vector(15 downto 0) := x"0800";
+  constant IPV4_JFRAME_TYPE             : std_logic_vector(15 downto 0) := x"0800"; --x"8870";
  
-  constant IP_BC_ADDR		: std_logic_vector (31 downto 0) := x"ffffffff";
-  constant MAC_BC_ADDR		: std_logic_vector (47 downto 0) := x"ffffffffffff";
+  constant IP_BC_ADDR		        : std_logic_vector (31 downto 0) := x"ffffffff";
+  constant MAC_BC_ADDR		        : std_logic_vector (47 downto 0) := x"ffffffffffff";
   
   --------------
   -- IPv4 TX --

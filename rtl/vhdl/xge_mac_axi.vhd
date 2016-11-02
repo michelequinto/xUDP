@@ -180,36 +180,6 @@ signal frame_started       : std_logic := '0';
   do_not_change_endianess : if (not CHANGE_EDIANESS) generate
     
     axi_rx.tdata <= pkt_rx_data;
-   
-    with pkt_rx_mod select axi_rx.tkeep <= "11111111" when "000",
-                                           "00000011" when "010",   
-                                           "00000111" when "011",   
-                                           "00001111" when "100",   
-                                           "00011111" when "101",
-                                           "00111111" when "110",
-                                           "01111111" when "111",
-                                           "XXXXXXXX" when others;
-
-    pkt_tx_data <= axi_tx.tdata;
-    
-    with axi_tx.tkeep select pkt_tx_mod  <= "000" when "11111111",
-                                            "001" when "00000001",             
-                                            "010" when "00000011",            
-                                            "011" when "00000111",      
-                                            "100" when "00001111",
-                                            "101" when "00011111",
-                                            "110" when "00111111",
-                                            "111" when "01111111",
-                                            "XXX" when others;
-    
-  end generate;
-
-  change_endianess : if CHANGE_EDIANESS generate
-
-    bytes_mingling : for i in 0 to axi_rx.tdata'length/8-1 generate
-      axi_rx.tdata(8*(i+1)-1 downto i*8) <= pkt_rx_data(pkt_rx_data'length-1-8*i downto pkt_rx_data'length-8*(i+1));
-      pkt_tx_data(8*(i+1)-1 downto i*8) <= axi_tx.tdata(axi_tx.tdata'length-1-8*i downto axi_tx.tdata'length-8*(i+1));  
-    end generate;
 
     with pkt_rx_mod select axi_rx.tkeep <= "11111111" when "000",
                                            "11000000" when "010",
@@ -221,6 +191,7 @@ signal frame_started       : std_logic := '0';
                                            "XXXXXXXX" when others;
 
     with axi_tx.tkeep select pkt_tx_mod <= "000" when "11111111",
+                                           "000" when "00000000",
                                            "001" when "10000000",             
                                            "010" when "11000000",            
                                            "011" when "11100000",      
@@ -229,6 +200,37 @@ signal frame_started       : std_logic := '0';
                                            "110" when "11111100",
                                            "111" when "11111110",
                                            "XXX" when others;
+    pkt_tx_data <= axi_tx.tdata;
+    
+  end generate;
+
+  change_endianess : if CHANGE_EDIANESS generate
+
+    bytes_mingling : for i in 0 to axi_rx.tdata'length/8-1 generate
+      axi_rx.tdata(8*(i+1)-1 downto i*8) <= pkt_rx_data(pkt_rx_data'length-1-8*i downto pkt_rx_data'length-8*(i+1));
+      pkt_tx_data(8*(i+1)-1 downto i*8) <= axi_tx.tdata(axi_tx.tdata'length-1-8*i downto axi_tx.tdata'length-8*(i+1));  
+    end generate;
+
+    with pkt_rx_mod select axi_rx.tkeep <= "11111111" when "000",
+                                           "00000011" when "010",   
+                                           "00000111" when "011",   
+                                           "00001111" when "100",   
+                                           "00011111" when "101",
+                                           "00111111" when "110",
+                                           "01111111" when "111",
+                                           "XXXXXXXX" when others;
+    
+    with axi_tx.tkeep select pkt_tx_mod  <= "000" when "11111111",
+                                            "000" when "00000000",
+                                            "001" when "00000001",             
+                                            "010" when "00000011",            
+                                            "011" when "00000111",      
+                                            "100" when "00001111",
+                                            "101" when "00011111",
+                                            "110" when "00111111",
+                                            "111" when "01111111",
+                                            "XXX" when others;
+
   end generate;
 
   generate_rx_tvalid : process(clk_156m25)
@@ -251,7 +253,16 @@ signal frame_started       : std_logic := '0';
   axi_rx_tvalid_i <= frame_started or pkt_rx_sop;
   
   pkt_rx_ren <= axi_rx_tready;
-                             
+
+  generate_sop : process(clk_156m25)
+    variable tvalid_d : std_logic := '0';
+  begin
+    if rising_edge(clk_156m25) then
+      pkt_tx_sop <= axi_tx.tvalid and (not tvalid_d);
+      tvalid_d := axi_tx.tvalid;
+    end if;
+  end process;
+  
   pkt_tx_val <= axi_tx.tvalid;
   pkt_tx_eop <= axi_tx.tlast; 
                      

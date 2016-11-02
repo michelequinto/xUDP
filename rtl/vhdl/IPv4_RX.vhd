@@ -38,13 +38,15 @@ entity IPv4_RX is
     -- IP Layer signals
     ip_rx                       : out ipv4_rx_type;
     ip_rx_start                 : out std_logic;                        -- indicates receipt of ip frame.
+    ip_rx_tready                : in std_logic;
     -- system signals
     clk                         : in  std_logic;                        -- same clock used to clock mac data and ip data
     rst                         : in  std_logic;
     our_ip_address              : in  std_logic_vector (31 downto 0);
     rx_pkt_count                : out std_logic_vector(7 downto 0);     -- number of IP pkts received for us
     -- MAC layer RX signals
-    mac_rx                      : in axi4_dvlk64_t
+    mac_rx                      : in axi4_dvlk64_t;
+    mac_rx_tready               : out std_logic
     );                  
 
 end IPv4_RX;
@@ -122,7 +124,7 @@ architecture rtl  of IPv4_RX is
 begin  -- rtl 
 
 
-  rx_comb : process(rx_state, mac_rx.tvalid, mac_rx.tlast, mac_rx.tdata)
+  rx_comb : process(rx_state, mac_rx.tvalid, mac_rx.tlast, mac_rx.tdata, wordCntData)
   begin
     wordCntRst          <= '0';
     frameCntCount       <= '0';
@@ -135,6 +137,7 @@ begin  -- rtl
     rx_err_i            <= RX_EC_NONE;
     tkeep_i             <= (others => 'X');
     tvalid_i            <= '0';
+    mac_rx_tready       <= '1';
     next_rx_state       <= rx_state;
     case rx_state is
       when IDLE =>
@@ -175,7 +178,8 @@ begin  -- rtl
         
       when USER_DATA =>
         tvalid_i <= '1';
-        tkeep_i <=  mac_rx.tkeep; 
+        tkeep_i <=  mac_rx.tkeep;
+        mac_rx_tready <= ip_rx_tready;
         if mac_rx.tvalid = '1' then
           if mac_rx.tlast = '1' then
             next_rx_state <= IDLE;
@@ -307,5 +311,7 @@ begin  -- rtl
      
   wordCntCount <= mac_rx.tvalid;
   rx_pkt_count <= frameCntData;
+
+  
   
 end rtl ;

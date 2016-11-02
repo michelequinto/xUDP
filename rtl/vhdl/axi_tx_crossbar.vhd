@@ -69,9 +69,8 @@ architecture rtl of axi_tx_crossbar is
       end if;     
     end process;
 
-    comb : process( axi_in )
+    comb : process( axi_in, axi_out_tready )
     begin
-      axi_in_tready <= (others => '0');
       latch_sel <= '0';
       sel_i <= (others => '0');
       n_st <= st;
@@ -88,7 +87,6 @@ architecture rtl of axi_tx_crossbar is
             end loop;
           end if;
         when TRANSFER =>
-          axi_in_tready(to_integer(unsigned(sel))) <= '1';
           if( axi_in(to_integer(unsigned(sel))).tvalid = '1'
             and axi_in(to_integer(unsigned(sel))).tlast = '1' ) then
             n_st <= IDLE;
@@ -98,21 +96,24 @@ architecture rtl of axi_tx_crossbar is
     end case;
     end process;
 
-    selector : process (clk)
+    selector : process (clk, rst)
     begin
-      if rising_edge(clk) then
+      if rst = '1' then
+        sel <= (others => '0');
+      elsif rising_edge(clk) then
         if latch_sel = '1' then
           sel <= sel_i;
         end if;
       end if;     
     end process;
 
-    selector_out : process (sel)
+    selector_out : process (sel, axi_in, axi_out_tready)
     begin
       axi_in_tready <= (others => '0');
       for i in 0 to N_PORTS-1 loop
         if to_integer(unsigned(sel)) = i then
           axi_out.tdata <= axi_in(i).tdata;
+          axi_out.tvalid <= axi_in(i).tvalid;
           axi_out.tkeep <= axi_in(i).tkeep;
           axi_out.tlast <= axi_in(i).tlast;
           axi_in_tready(i) <= axi_out_tready;

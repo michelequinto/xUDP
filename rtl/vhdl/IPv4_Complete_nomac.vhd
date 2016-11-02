@@ -44,11 +44,12 @@ entity IPv4_Complete_nomac is
     port (
       -- IP Layer signals
       ip_tx_start			: in std_logic;
-      ip_tx				: in ipv4_tx_type;						           -- IP tx cxns
-      ip_tx_result			: out std_logic_vector (1 downto 0);		-- tx status (changes during transmission)
-      ip_tx_data_out_ready	        : out std_logic;									-- indicates IP TX is ready to take data
-      ip_rx_start			: out std_logic;								   -- indicates receipt of ip frame.
+      ip_tx				: in ipv4_tx_type;
+      ip_tx_result			: out std_logic_vector (1 downto 0);
+      ip_tx_tready	                : out std_logic;									
+      ip_rx_start			: out std_logic;
       ip_rx				: out ipv4_rx_type;
+      ip_rx_tready                      : in std_logic;
 
       -- clock
       clk                               : in xUDP_CLOCK_T;
@@ -60,10 +61,10 @@ entity IPv4_Complete_nomac is
       arp_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- count of arp pkts received
       ip_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- number of IP pkts received for us
       
-      -- MAC TX
       mac_tx                            : out axi4_dvlk64_t;
-      -- MAC RX
-      mac_rx                            : in axi4_dvlk64_t            
+      mac_rx                            : in axi4_dvlk64_t;
+      mac_tx_tready                     : in std_logic;
+      mac_rx_tready                     : out std_logic
       );
 end IPv4_Complete_nomac;
 
@@ -87,12 +88,12 @@ architecture structural of IPv4_Complete_nomac is
       data_in             : in axi4_dvlk64_t;           -- AXI4 input stream
       -- MAC layer TX signals
       mac_tx_req          : out std_logic;              -- indicates that ip wants access to channel (stays up for as long as tx)
-      mac_tx_granted      : in  std_logic;              -- indicates that access to channel has been granted            
+      mac_tx_granted      : in std_logic;              -- indicates that access to channel has been granted            
       data_out_ready      : in  std_logic;              -- indicates system ready to consume data
       data_out            : out axi4_dvlk64_t;          -- AXI4 output stream
       -- system signals
       cfg                 : in xUDP_CONIGURATION_T;
-      control             : in  arp_control_type;
+      control             : in arp_control_type;
       req_count           : out std_logic_vector(7 downto 0);    -- count of arp pkts received
       clks                : in xUDP_CLOCK_T
     );
@@ -101,14 +102,16 @@ architecture structural of IPv4_Complete_nomac is
   component IPv4
     port (
       -- IP Layer signals
-      ip_tx_start				: in std_logic;
-      ip_tx					: in ipv4_tx_type;				-- IP tx cxns
-      ip_tx_result		        	: out std_logic_vector (1 downto 0);		-- tx status (changes during transmission)
-      ip_tx_data_out_ready	                : out std_logic;				-- indicatess IP TX is ready to take data
-      ip_rx_start				: out std_logic;				-- indicates receipt of ip frame.
-      ip_rx					: out ipv4_rx_type;
-      -- clock
+      ip_tx_start			        : in std_logic;
+      ip_tx				        : in ipv4_tx_type;
+      ip_tx_result			        : out std_logic_vector (1 downto 0);
+      ip_tx_tready	                        : out std_logic;									
+      ip_rx_start			        : out std_logic;
+      ip_rx			        	: out ipv4_rx_type;
+      ip_rx_tready                              : in std_logic;
+           
       clk                                       : in xUDP_CLOCK_T;
+
       -- udp conf
       udp_conf                                  : xUDP_CONIGURATION_T;
       
@@ -117,12 +120,12 @@ architecture structural of IPv4_Complete_nomac is
       -- ARP lookup signals
       arp_req_req				: out arp_req_req_type;
       arp_req_rslt		        	: in arp_req_rslt_type;
-      -- MAC layer RX signals
+
+      -- MAC layer signals
       mac_rx     			        : in axi4_dvlk64_t;
-      -- MAC layer TX signals
-      mac_tx_req				: out std_logic;				-- indicates that ip wants access to channel (stays up for as long as tx)
-      mac_tx_granted			        : in std_logic;					-- indicatess that access to channel has been granted		
-      mac_tx                                    : out axi4_dvlk64_t
+      mac_tx                                    : out axi4_dvlk64_t;
+      mac_tx_tready                             : in std_logic;
+      mac_rx_tready                             : out std_logic
       );
 end component;
 
@@ -157,56 +160,57 @@ signal ip_mac_tx, arp_mac_tx            : axi4_dvlk64_t;
 
 begin
   
-  ip_layer_inst : IPv4 port map
-    (
-      
-      clk                  => clk, 
-      ip_tx_start          => ip_tx_start,
-      ip_tx                => ip_tx,
-      ip_tx_result         => ip_tx_result,
-      ip_tx_data_out_ready => ip_tx_data_out_ready,
-      ip_rx_start          => ip_rx_start,
-      ip_rx                => ip_rx,
-      udp_conf             => udp_conf,
-      rx_pkt_count         => ip_pkt_count,
-      arp_req_req          => arp_req_req_int,
-      arp_req_rslt         => arp_req_rslt_int,
-      mac_tx_req           => ip_mac_req,
-      mac_tx_granted       => ip_mac_grant,
-      mac_tx               => ip_mac_tx,
-      mac_rx               => mac_rx
-      );
+  ip_layer_inst : IPv4 port map (
+    clk                  => clk, 
+    ip_tx_start          => ip_tx_start,
+    ip_tx                => ip_tx,
+    ip_tx_result         => ip_tx_result,
+    ip_tx_tready         => ip_tx_tready,
+    ip_rx_start          => ip_rx_start,
+    ip_rx                => ip_rx,
+    ip_rx_tready         => ip_rx_tready,
+    
+    udp_conf             => udp_conf,
+    rx_pkt_count         => ip_pkt_count,
+    
+    arp_req_req          => arp_req_req_int,
+    arp_req_rslt         => arp_req_rslt_int,
+    
+    mac_tx               => ip_mac_tx,
+    mac_tx_tready        => ip_mac_tready,
+    mac_rx               => mac_rx,
+    mac_rx_tready        => mac_rx_tready
+  );
 
   arp_layer_inst : arp port map (
-     
-      arp_req_req         => arp_req_req_int,
-      arp_req_rslt        => arp_req_rslt_int,
-     
-      data_in             => mac_rx, 
-     
-      mac_tx_req          => open, 
-      mac_tx_granted      => '0',
-      data_out_ready      => arp_mac_tready, 
-      data_out            => arp_mac_tx,
-  
-      cfg                 => udp_conf,
-      control             => arp_control,
-      req_count           => open,
-      clks                => clk
-    );
+    arp_req_req         => arp_req_req_int,
+    arp_req_rslt        => arp_req_rslt_int,
+    
+    data_in             => mac_rx, 
+    
+    mac_tx_req          => arp_mac_tx.tvalid, 
+    mac_tx_granted      => arp_mac_tready,
+    data_out_ready      => arp_mac_tready, 
+    data_out            => arp_mac_tx,
+    
+    cfg                 => udp_conf,
+    control             => arp_control,
+    req_count           => open,
+    clks                => clk
+  );
 
   arp_control <= control.ip_controls.arp_controls;
   
   axi_tx_crossbar_inst : axi_tx_crossbar port map (
-      clk                  => clk.tx_clk,
-      rst                  => clk.tx_reset,    
-      
-      axi_in_tready(0)     => ip_mac_tready,
-      axi_in_tready(1)     => arp_mac_tready,
-      axi_in(0)            => ip_mac_tx,
-      axi_in(1)            => arp_mac_tx,
-      axi_out              => mac_tx,
-      axi_out_tready       => '1'
-    );
-
+    clk                  => clk.tx_clk,
+    rst                  => clk.tx_reset,    
+    
+    axi_in_tready(0)     => ip_mac_tready,
+    axi_in_tready(1)     => arp_mac_tready,
+    axi_in(0)            => ip_mac_tx,
+    axi_in(1)            => arp_mac_tx,
+    axi_out              => mac_tx,
+    axi_out_tready       => mac_tx_tready
+  );
+  
 end structural;
