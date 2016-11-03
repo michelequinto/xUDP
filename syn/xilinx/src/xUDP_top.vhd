@@ -1,6 +1,38 @@
+-- Filename            : xUDP.vhd
+-- Description         : 
+-- Author              : Michele Quinto
+-- Created On          : Tue Oct 30 20:49:07 2016
+
+-- $LastChangedBy$
+-- $LastChangedRevision$
+-- $LastChangedDate$
+-- $URL$
+
+------------------------------------------------------------------
+
+-- Copyright 2016 Michele Quinto
+
+-- This program is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>
+------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.axi_types.all;
+use work.ipv4_types.all;
+use work.arp_types.all;
+use work.xUDP_Common_pkg.all;
 
 library UNISIM;
 use UNISIM.Vcomponents.all;
@@ -83,7 +115,7 @@ end component;
 --XAUI
 
 --xge_mac
-component xge_mac is
+component xge_mac_axi is
   port(
     xgmii_rxd           : in std_logic_vector(63 downto 0);
     xgmii_rxc           : in std_logic_vector(7 downto 0);
@@ -97,12 +129,7 @@ component xge_mac is
     reset_xgmii_tx_n    : in std_logic;
     reset_xgmii_rx_n    : in std_logic;
     reset_156m25_n      : in std_logic;
-    pkt_tx_val          : in std_logic;
-    pkt_tx_sop          : in std_logic;
-    pkt_tx_mod          : in std_logic_vector(2 downto 0);
-    pkt_tx_eop          : in std_logic;
-    pkt_tx_data         : in std_logic_vector(63 downto 0);
-    pkt_rx_ren          : in std_logic;
+   
     clk_xgmii_tx        : in std_logic;
     clk_xgmii_rx        : in std_logic;
     clk_156m25          : in std_logic;          
@@ -111,17 +138,43 @@ component xge_mac is
     wb_int_o            : out std_logic;
     wb_dat_o            : out std_logic_vector(31 downto 0);
     wb_ack_o            : out std_logic;
-    pkt_tx_full         : out std_logic;
-    pkt_rx_val          : out std_logic;
-    pkt_rx_sop          : out std_logic;
-    pkt_rx_mod          : out std_logic_vector(2 downto 0);
-    pkt_rx_err          : out std_logic;
-    pkt_rx_eop          : out std_logic;
-    pkt_rx_data         : out std_logic_vector(63 downto 0);
-    pkt_rx_avail        : out std_logic
+
+    axi_rx              : out axi4_dvlk64_t;
+    axi_tx              : in axi4_dvlk64_t;
+    axi_tx_tready       : out std_logic;
+    axi_rx_tready       : in std_logic
     );
 end component;
---xge_mac
+
+component IPv4_Complete_nomac
+  generic (
+    CLOCK_FREQ			: integer := 156250000;					-- freq of data_in_clk -- needed to timout cntr
+    ARP_TIMEOUT			: integer := 60;					-- ARP response timeout (s)
+    ARP_MAX_PKT_TMO             : integer := 5;						-- # wrong nwk pkts received before set error
+    MAX_ARP_ENTRIES 	        : integer := 255					-- max entries in the ARP store
+    );
+    port (
+      -- IP Layer signals
+      ip_tx_start			: in std_logic;
+      ip_tx				: in ipv4_tx_type;
+      ip_tx_result			: out std_logic_vector (1 downto 0);
+      ip_tx_tready	                : out std_logic;									
+      ip_rx_start			: out std_logic;
+      ip_rx				: out ipv4_rx_type;
+      ip_rx_tready                      : in std_logic;
+      -- clock
+      clk                               : in xUDP_CLOCK_T;
+      udp_conf                          : in xUDP_CONIGURATION_T;
+      control				: in udp_control_type;
+      -- status signals
+      arp_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- count of arp pkts received
+      ip_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- number of IP pkts received for us
+      mac_tx                            : out axi4_dvlk64_t;
+      mac_rx                            : in axi4_dvlk64_t;
+      mac_tx_tready                     : in std_logic;
+      mac_rx_tready                     : out std_logic
+      );
+end component;
 
 -------------------------------------------------------------------------------
 -- Signal declaration
@@ -132,7 +185,6 @@ signal reset                    : std_logic;          -- board reset
 --clocks
 signal clk100	 		: std_logic;
 signal clk156			: std_logic;
-
 signal txlock                   : std_logic;
 
 --mdio
@@ -158,28 +210,138 @@ signal xgmii_rxc                : std_logic_vector(7 downto 0)  := (others => '0
 
 -------------------------------------------------------------------------------
 --XGE_MAC
---RX SIDE
-signal pkt_rx_ren               : std_logic;
-signal pkt_rx_val               : std_logic;
-signal pkt_rx_sop               : std_logic;
-signal pkt_rx_mod               : std_logic_vector(2 downto 0);
-signal pkt_rx_err                : std_logic;
-signal pkt_rx_eop               : std_logic;
-signal pkt_rx_data              : std_logic_vector(63 downto 0);
-signal pkt_rx_avail             : std_logic;
---TX SIDE
-signal pkt_tx_full              : std_logic;
-signal pkt_tx_val               : std_logic;
-signal pkt_tx_sop               : std_logic;
-signal pkt_tx_mod               : std_logic_vector(2 downto 0);
-signal pkt_tx_eop               : std_logic;
-signal pkt_tx_data              : std_logic_vector(63 downto 0);
+signal axi_rx                   : axi4_dvlk64_t;
+signal axi_tx                   : axi4_dvlk64_t;
+signal axi_tx_tready            : std_logic;
+signal axi_rx_tready            : std_logic;
 -------------------------------------------------------------------------------
 
 BEGIN
   
 reset <= not BRD_RESET_SW;              --reset connected only to push button for
                                         --the time being
+
+MDIO_BLOCK : block
+
+  signal brd_clk, mdio_clk, mdio_clk_locked, mdio_reset : std_logic;
+  signal phy_reset : std_logic;
+  signal phy_init_reset, phy_init_done : std_logic;
+  
+  signal mdio_t, mdio_i, mdio_o, mdc_o, mgmt_clk_locked, mgmt_clk_locked_i : std_logic;
+  signal mdio_in_valid, mdio_out_valid, mdio_busy : std_logic;
+  signal mdio_opcode : std_logic_vector(1 downto 0);
+  signal mdio_data_in : std_logic_vector(15 downto 0);
+  signal mdio_data_out : std_logic_vector(25 downto 0);
+  signal mgmt_config : std_logic_vector(31 downto 0);
+  signal mdio_cmd_read, mdio_cmd_write, mdio_read_data_valid, mdio_write_data_valid : std_logic;
+  signal mdio_cmd_read_i, mdio_cmd_write_i : std_logic;
+  signal mdio_cmd_address, mdio_cmd_data : std_logic_vector(15 downto 0);
+  signal mdio_cmd_address_i, mdio_cmd_data_i : std_logic_vector(15 downto 0);
+  signal mdio_cmd_prtdev_address : std_logic_vector(9 downto 0);
+  signal mdio_cmd_prtdev_address_i : std_logic_vector(9 downto 0);
+  signal mdio_opcode_c, mdio_opcode_i : std_logic_vector(1 downto 0);
+  signal mdio_out_valid_c, mdio_out_valid_i : std_logic;
+  signal mdio_data_out_c, mdio_data_out_i: std_logic_vector(25 downto 0);
+  
+  signal cmd_read_init, cmd_write_init : std_logic;
+  signal cmd_prtdev_address_init : std_logic_vector(9 downto 0);
+  signal cmd_address_init, cmd_data_init: std_logic_vector(15 downto 0);
+  
+begin
+
+  phy_init_reset <= (not mdio_clk_locked);
+  PHY_RSTN <= not phy_reset;
+    
+  vsc8486_init_inst : entity work.vsc8486_init PORT MAP(
+    reset                       => phy_init_reset,
+    clk                         => mdio_clk,
+    phy_reset 			=> phy_reset,
+    init_done 			=> phy_init_done,
+    cmd_read 			=> cmd_read_init,
+    cmd_write 			=> cmd_write_init,
+    cmd_write_data_valid 	=> mdio_write_data_valid,
+    cmd_prtdev_address 		=> cmd_prtdev_address_init,
+    cmd_address			=> cmd_address_init,
+    cmd_data 			=> cmd_data_init
+    );
+	
+  mdio_cmd_read_i               <= cmd_read_init 		when phy_init_done = '0' else mdio_cmd_read;
+  mdio_cmd_write_i              <= cmd_write_init 		when phy_init_done = '0' else mdio_cmd_write;
+  mdio_cmd_prtdev_address_i     <= cmd_prtdev_address_init      when phy_init_done = '0' else mdio_cmd_prtdev_address;
+  mdio_cmd_address_i 		<= cmd_address_init             when phy_init_done = '0' else mdio_cmd_address;
+  mdio_cmd_data_i 		<= cmd_data_init 		when phy_init_done = '0' else mdio_cmd_data;
+	
+  mdio_ctrl_inst : entity work.mdio_ctrl PORT MAP(
+    clk                 => mdio_clk,
+    reset               => mdio_reset,
+    cmd_read 		=> mdio_cmd_read_i,
+    cmd_write 		=> mdio_cmd_write_i,
+    prtdev_address 	=> mdio_cmd_prtdev_address_i,
+    address 		=> mdio_cmd_address_i,
+    data 		=> mdio_cmd_data_i,
+    
+    read_data_valid 	=> mdio_read_data_valid,
+    write_data_valid 	=> mdio_write_data_valid,
+    
+    mdio_busy 		=> mdio_busy,
+    mdio_opcode 	=> mdio_opcode_c,
+    mdio_out_valid 	=> mdio_out_valid_c,
+    mdio_data_out 	=> mdio_data_out_c
+    );
+	
+  mdio_opcode 		<= mdio_opcode_c 	when mdio_write_data_valid = '1' else mdio_opcode_i;
+  mdio_out_valid 	<= mdio_out_valid_c 	when mdio_write_data_valid = '1' else mdio_out_valid_i;
+  mdio_data_out 	<= mdio_data_out_c 	when mdio_write_data_valid = '1' else mdio_data_out_i;
+  
+  mdio_inst : entity work.mdio PORT MAP(
+    mgmt_clk 	        => mdio_clk,
+    reset 		=> mdio_reset,
+    busy 		=> mdio_busy,
+    mdc 		=> mdc_o,
+    mdio_t 		=> mdio_t,
+    mdio_i 		=> mdio_i,
+    mdio_o 		=> mdio_o,
+    mdio_opcode 	=> mdio_opcode,
+    mdio_in_valid 	=> mdio_in_valid,
+    mdio_data_in 	=> mdio_data_in,
+    mdio_out_valid 	=> mdio_out_valid,
+    mdio_data_out 	=> mdio_data_out,
+    mgmt_config 	=> mgmt_config
+    );
+
+  IOBUF_MDIO : IOBUF
+    generic map ( DRIVE => 12,  SLEW => "SLOW")
+    port map (
+      O => mdio_i,    
+      IO => MDIO_PAD,   
+      I => mdio_o,     -- Buffer input
+      T => mdio_t     -- 3-state enable input, high=input, low=output 
+   );
+  
+  MDC <= mdc_o;
+
+  clk_wiz_v3_3_0_inst : entity work.clk_wiz_v3_3_0 PORT MAP(
+    CLK_IN1_P => BRD_CLK_P,
+    CLK_IN1_N => BRD_CLK_N,       
+    CLK_OUT1 => brd_clk,       
+    RESET => reset,
+    LOCKED => mdio_clk_locked
+    );
+  
+  BUFR_inst : BUFR
+    generic map (
+      BUFR_DIVIDE => "4",   -- "BYPASS", "1", "2", "3", "4", "5", "6", "7", "8" 
+      SIM_DEVICE => "VIRTEX6")
+   port map (
+      O => mdio_clk,    -- Clock buffer output
+      CE => '1',        -- Clock enable input
+      CLR => '0',       -- Clock buffer reset input
+      I => brd_clk      -- Clock buffer input
+   );
+
+  mdio_reset <= reset or (not mdio_clk_locked);
+  
+end block;
   
 XAUI_MANAGMENT_BLOCK : block
 ----------------------------------------------------------------------------
@@ -366,7 +528,7 @@ XGE_MANAGMENT_BLOCK : block
 
 begin
 
-  xge_mac_inst : xge_mac
+  xge_mac_axi_inst : xge_mac_axi
     port map ( reset_xgmii_tx_n => xge_reset_n,
                reset_xgmii_rx_n => xge_reset_n,
                reset_156m25_n   => xge_reset_n,
@@ -387,20 +549,10 @@ begin
                wb_dat_i         => (others => '0'),
                wb_adr_i         => (others => '0'),
                
-               pkt_tx_full 	=> pkt_tx_full,
-               pkt_rx_val 	=> pkt_rx_val,
-               pkt_rx_sop 	=> pkt_rx_sop,
-               pkt_rx_mod 	=> pkt_rx_mod,
-               pkt_rx_err 	=> pkt_rx_err,
-               pkt_rx_eop 	=> pkt_rx_eop ,
-               pkt_rx_data 	=> pkt_rx_data ,
-               pkt_rx_avail 	=> pkt_rx_avail,
-               pkt_tx_val 	=> pkt_tx_val,
-               pkt_tx_sop 	=> pkt_tx_sop,
-               pkt_tx_mod 	=> pkt_tx_mod,
-               pkt_tx_eop 	=> pkt_tx_eop,
-               pkt_tx_data 	=> pkt_tx_data,
-               pkt_rx_ren 	=> pkt_rx_ren );
+               axi_rx           => axi_rx,
+               axi_tx           => axi_tx,
+               axi_tx_tready    => axi_tx_tready,
+               axi_rx_tready    => axi_rx_tready );
 
   xge_mac_reset : process(clk156, reset)
   begin
@@ -415,7 +567,60 @@ begin
     end if;
   end process;        
 
-end block XGE_MANAGMENT_BLOCK; 
+end block XGE_MANAGMENT_BLOCK;
+
+IP: block
+  signal control        : udp_control_type;
+  signal ip_tx          : ipv4_tx_type;
+  signal ip_rx_tready   : std_logic;
+  signal reset          : std_logic;
+  signal ip_tx_start    : std_logic := '0';
+
+  signal udp_conf       : xUDP_CONIGURATION_T;
+  signal clk            : xUDP_CLOCK_T;
+  
+begin  -- block IP
+  ip_inst : IPv4_Complete_nomac
+    port map (
+      -- IP Layer signals
+      ip_tx_start		=> ip_tx_start,
+      ip_tx			=> ip_tx,
+      ip_tx_result		=> open,
+      ip_tx_tready	        => open,
+      ip_rx_start		=> open,
+      ip_rx			=> open,
+      ip_rx_tready              => ip_rx_tready,
+      clk                       => clk,
+      udp_conf                  => udp_conf,
+     
+      control			=> control,
+      -- status signals
+      arp_pkt_count		=> open,
+      ip_pkt_count		=> open,
+      
+      mac_rx           => axi_rx,
+      mac_tx           => axi_tx,
+      mac_tx_tready    => axi_tx_tready,
+      mac_rx_tready    => axi_rx_tready );
+
+  reset <= not BRD_RESET_SW;
+  control.ip_controls.arp_controls.clear_cache <= '0';
+  
+  clk.tx_clk <= clk156;
+  clk.rx_clk <= clk156;
+  clk.tx_reset <= reset;
+  clk.rx_reset <= reset;
+
+  udp_conf.ip_address <= x"10000003";
+  udp_conf.mac_address <= x"10_1f_74_e6_a4_0d";
+  udp_conf.nwk_gateway <= x"10000000";
+  udp_conf.nwk_mask <= x"FFFFFF00";
+
+  ip_rx_tready <= '1';
+  ip_tx.data.tvalid <= '0';
+  
+end block IP;
+  
 
 -------------------------------------------------------------------------------  
 -- Board clock management logic
@@ -457,14 +662,7 @@ begin
   FPGA_LED(0) <= hbCnt(23);
 end process;
 
--------------------------------------------------------------------------------
--- Drive the xge mac tx side - temporary
--------------------------------------------------------------------------------
-pkt_tx_val <= '0';
-pkt_tx_sop <= '0';
-pkt_tx_mod <= (others => '0');
-pkt_tx_eop <= '0';
-pkt_tx_data <= (others => '0');
+
 
 -------------------------------------------------------------------------------
 -- Drive MDIO temporary
@@ -472,10 +670,5 @@ pkt_tx_data <= (others => '0');
 mdio_i <= '0';
 mdio_o <= '1';
 mdio_t <= '1';
-
--------------------------------------------------------------------------------
--- Dump MAC rx side - temporarily
--------------------------------------------------------------------------------
-pkt_rx_ren <= '1';
 
 END Structural;

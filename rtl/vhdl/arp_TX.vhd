@@ -53,7 +53,7 @@ architecture Behavioral of arp_tx is
     type count_mode_t is (RST, INCR, HOLD);
     type dcount_mode_t is (SET, DECR, HOLD);
     type set_clr_t is (SET, CLR, HOLD);
-    type tx_state_t is (IDLE, WAIT_MAC, SEND);
+    type tx_state_t is (IDLE, SEND);
     type tx_mode_t is (REPLY, REQUEST);
 
     -- state variables
@@ -130,7 +130,6 @@ begin
 
     -- set combinatorial output defaults
     data_out <= empty_axi4_dvlk64;
-    data_out.tvalid <= '0';
 
     -- set bus defaults
     next_tx_state  <= tx_state;
@@ -166,7 +165,7 @@ begin
                 target_val      <= I_have_target;
                 set_target      <= '1';
                 set_send_I_have <= CLR;
-                next_tx_state   <= WAIT_MAC;
+                next_tx_state   <= SEND;--WAIT_MAC;
                 set_timer       <= SET;
             elsif send_who_has_reg = '1' then
                 set_chn_reqd     <= SET;
@@ -176,29 +175,31 @@ begin
                 target_val.mac   <= (others => '1');
                 set_target       <= '1';
                 set_send_who_has <= CLR;
-                next_tx_state    <= WAIT_MAC;
+                next_tx_state    <= SEND;--WAIT_MAC;
                 set_timer        <= SET;
             else
                 set_chn_reqd <= CLR;
             end if;
 
-        when WAIT_MAC =>
-            tx_count_mode <= RST;
-            data_out.tvalid <= '1';
-            if mac_tx_granted = '1' then
-                next_tx_state <= SEND;
-            end if;
-            set_timer <= DECR;
-            if timer = x"00" then
-                next_tx_state <= IDLE;
-                set_chn_reqd <= SET;
-            end if;
+        --when WAIT_MAC =>
+        --    tx_count_mode <= RST;
+        --    data_out.tvalid <= '1';
+        --    if mac_tx_granted = '1' then
+        --        next_tx_state <= SEND;
+        --    end if;
+        --    set_timer <= DECR;
+        --    if timer = x"00" then
+        --        next_tx_state <= IDLE;
+        --        set_chn_reqd <= SET;
+        --    end if;
 
         when SEND =>
             data_out.tvalid <= '1';
-            if data_out_ready = '1' then
-                tx_count_mode <= INCR;
+                   
+            if data_out_ready = '1' then  -- count words
+              tx_count_mode <= INCR;
             end if;
+            
             case to_integer(tx_count) is
 
               when 0 =>
@@ -242,11 +243,12 @@ begin
                 data_out.tdata(63 downto 48)  <= target.ip (15 downto 0);     -- TPA (target prot addr)
                 data_out.tlast <= '1';
                 data_out.tkeep <= "11000000";
+                next_tx_state <= IDLE;
 
               when 6 =>
                 data_out.tvalid <= '0';
                 set_chn_reqd <= CLR;
-                next_tx_state       <= IDLE;
+                next_tx_state <= IDLE;
 
               when others =>
                 next_tx_state <= IDLE;
