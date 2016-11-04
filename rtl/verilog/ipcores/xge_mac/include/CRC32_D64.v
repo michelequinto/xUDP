@@ -20,8 +20,9 @@
 //       http://www.easics.com                                  
 ///////////////////////////////////////////////////////////////////////
 
-
-module CRC32_D64;
+`ifdef MODEL_TECH
+	module CRC32_D64;	
+`endif
 
   // polynomial: (0 1 2 4 5 7 8 10 11 12 16 22 23 26 32)
   // data width: 64
@@ -262,5 +263,7 @@ module CRC32_D64;
 
   endfunction
 
-endmodule
+`ifdef MODEL_TECH
+	endmodule
+`endif
 

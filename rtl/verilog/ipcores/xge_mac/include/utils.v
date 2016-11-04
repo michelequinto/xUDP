@@ -35,7 +35,9 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 
-module utils;
+`ifdef MODEL_TECH
+	module utils;
+`endif
    
 
 function [63:0] reverse_64b;
@@ -70,5 +72,7 @@ function [7:0] reverse_8b;
     end
 endfunction
 
-endmodule
+`ifdef MODEL_TECH
+	endmodule
+`endif
 

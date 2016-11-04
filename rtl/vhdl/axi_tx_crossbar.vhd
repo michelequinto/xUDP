@@ -69,7 +69,7 @@ architecture rtl of axi_tx_crossbar is
       end if;     
     end process;
 
-    comb : process( axi_in, axi_out_tready )
+    comb : process( axi_in, axi_out_tready, sel, st )
     begin
       latch_sel <= '0';
       sel_i <= (others => '0');

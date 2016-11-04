@@ -55,10 +55,12 @@ module rx_enqueue(/*AUTOARG*/
 `include "CRC32_D64.v"
 `include "CRC32_D8.v"
 `include "utils.v"
-   
+ 
+`ifdef MODEL_TECH 
    CRC32_D64 crc64();
    CRC32_D8 crc8();
    utils util();
+`endif
 
 input         clk_xgmii_rx;
 input         reset_xgmii_rx_n;
@@ -383,7 +385,11 @@ always @(posedge clk_xgmii_rx or negedge reset_xgmii_rx_n) begin
         end
         else begin
 
+`ifdef MODEL_TECH
             crc32_d64 <= crc64.nextCRC32_D64(util.reverse_64b(xgxs_rxd_barrel_d1), crc32_d64);
+`else
+				crc32_d64 <= nextCRC32_D64(reverse_64b(xgxs_rxd_barrel_d1), crc32_d64);
+`endif
 
         end
 
@@ -397,8 +403,11 @@ always @(posedge clk_xgmii_rx or negedge reset_xgmii_rx_n) begin
             if (crc_bytes == 4'b1) begin
                 crc_done <= 1'b1;
             end
-
+`ifdef MODEL_TECH
             crc32_d8 <= crc8.nextCRC32_D8(util.reverse_8b(crc_shift_data[7:0]), crc32_d8);
+`else
+				crc32_d8 <= nextCRC32_D8(reverse_8b(crc_shift_data[7:0]), crc32_d8);
+`endif				
             crc_shift_data <= {8'h00, crc_shift_data[63:8]};
             crc_bytes <= crc_bytes - 4'b1;
 
@@ -472,7 +481,11 @@ always @(/*AS*/crc32_d8 or crc_done or crc_rx or pause_frame_hold) begin
 
         // Check CRC. If this is a pause frame, report it to cpu.
 
+`ifdef MODEL_TECH
         if (crc_rx == ~util.reverse_32b(crc32_d8)) begin
+`else
+		  if (crc_rx == ~reverse_32b(crc32_d8)) begin	
+`endif		  
             crc_good = 1'b1;
             good_pause_frame = pause_frame_hold;
         end

@@ -57,10 +57,11 @@ module tx_dequeue(/*AUTOARG*/
 `include "CRC32_D8.v"
 `include "utils.v"
 
+`ifdef MODEL_TECH
    CRC32_D64 crc64();
    CRC32_D8 crc8();
    utils util();
-      
+`endif	      
    
 input         clk_xgmii_tx;
 input         reset_xgmii_tx_n;
@@ -925,9 +926,11 @@ always @(posedge clk_xgmii_tx or negedge reset_xgmii_tx_n) begin
         // is ready to be transmited.
 
         if (txhfifo_wen) begin
-
+`ifdef MODEL_TECH
             crc32_d64 <= crc64.nextCRC32_D64(util.reverse_64b(txhfifo_wdata), crc_data);
-
+`else	
+				crc32_d64 <= nextCRC32_D64(reverse_64b(txhfifo_wdata), crc_data);
+`endif
         end
 
         if (txhfifo_wen && txhfifo_wstatus[`TXSTATUS_EOP]) begin
@@ -952,8 +955,11 @@ always @(posedge clk_xgmii_tx or negedge reset_xgmii_tx_n) begin
 
             // Complete crc calculation 8-bit at a time until finished. This can
             // be 1 to 8 bytes long.
-
+`ifdef MODEL_TECH
             crc32_d8 <= crc8.nextCRC32_D8(util.reverse_8b(shift_crc_data[7:0]), crc32_d8);
+`else
+				crc32_d8 <= nextCRC32_D8(reverse_8b(shift_crc_data[7:0]), crc32_d8);
+`endif				
 
             shift_crc_data <= {8'b0, shift_crc_data[63:8]};
             shift_crc_eop <= shift_crc_eop - 4'd1;
@@ -967,9 +973,11 @@ always @(posedge clk_xgmii_tx or negedge reset_xgmii_tx_n) begin
         // last data word.
 
         if (shift_crc_cnt == 4'b1) begin
-
+`ifdef MODEL_TECH
             crc32_tx <= ~util.reverse_32b(crc32_d8);
-
+`else
+				crc32_tx <= ~reverse_32b(crc32_d8);
+`endif
         end
         else begin
 

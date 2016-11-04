@@ -154,9 +154,10 @@ signal ip_mac_req         : std_logic;
 signal ip_mac_grant       : std_logic;
 signal udp_clk            : xUDP_CLOCK_T;
 signal arp_control        : arp_control_type;
+signal mac_tx_req			  : std_logic;
 
 signal ip_mac_tready, arp_mac_tready    : std_logic;
-signal ip_mac_tx, arp_mac_tx            : axi4_dvlk64_t;
+signal ip_mac_tx, arp_mac_tx, arp_mac_tx_i : axi4_dvlk64_t;
 
 begin
   
@@ -188,16 +189,21 @@ begin
     
     data_in             => mac_rx, 
     
-    mac_tx_req          => arp_mac_tx.tvalid, 
+    mac_tx_req          => mac_tx_req, 
     mac_tx_granted      => arp_mac_tready,
     data_out_ready      => arp_mac_tready, 
-    data_out            => arp_mac_tx,
+    data_out            => arp_mac_tx_i,
     
     cfg                 => udp_conf,
     control             => arp_control,
     req_count           => open,
     clks                => clk
   );
+
+  arp_mac_tx.tdata <= arp_mac_tx_i.tdata;
+  arp_mac_tx.tvalid <= arp_mac_tx_i.tvalid or mac_tx_req;
+  arp_mac_tx.tlast <= arp_mac_tx_i.tlast;
+  arp_mac_tx.tkeep <= arp_mac_tx_i.tkeep;
 
   arp_control <= control.ip_controls.arp_controls;
   

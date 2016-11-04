@@ -191,6 +191,7 @@ signal txlock                   : std_logic;
 signal mdio_i			: std_logic;
 signal mdio_o			: std_logic;
 signal mdio_t			: std_logic;
+signal mdc_o 		 	: std_logic;
 
 -------------------------------------------------------------------------------
 --XAUI
@@ -226,8 +227,6 @@ MDIO_BLOCK : block
   signal brd_clk, mdio_clk, mdio_clk_locked, mdio_reset : std_logic;
   signal phy_reset : std_logic;
   signal phy_init_reset, phy_init_done : std_logic;
-  
-  signal mdio_t, mdio_i, mdio_o, mdc_o, mgmt_clk_locked, mgmt_clk_locked_i : std_logic;
   signal mdio_in_valid, mdio_out_valid, mdio_busy : std_logic;
   signal mdio_opcode : std_logic_vector(1 downto 0);
   signal mdio_data_in : std_logic_vector(15 downto 0);
@@ -308,17 +307,6 @@ begin
     mdio_data_out 	=> mdio_data_out,
     mgmt_config 	=> mgmt_config
     );
-
-  IOBUF_MDIO : IOBUF
-    generic map ( DRIVE => 12,  SLEW => "SLOW")
-    port map (
-      O => mdio_i,    
-      IO => MDIO_PAD,   
-      I => mdio_o,     -- Buffer input
-      T => mdio_t     -- 3-state enable input, high=input, low=output 
-   );
-  
-  MDC <= mdc_o;
 
   clk_wiz_v3_3_0_inst : entity work.clk_wiz_v3_3_0 PORT MAP(
     CLK_IN1_P => BRD_CLK_P,
@@ -646,6 +634,7 @@ mdio_iobuf : IOBUF
               IO => MDIO_PAD,   
               I => mdio_o,
               T => mdio_t );
+MDC <= mdc_o;
 
 -------------------------------------------------------------------------------
 -- Heartbeat generated form the PHY clock
@@ -661,14 +650,5 @@ begin
   --drive LED0 heartbeat
   FPGA_LED(0) <= hbCnt(23);
 end process;
-
-
-
--------------------------------------------------------------------------------
--- Drive MDIO temporary
--------------------------------------------------------------------------------
-mdio_i <= '0';
-mdio_o <= '1';
-mdio_t <= '1';
 
 END Structural;

@@ -115,20 +115,20 @@ end component;
 -------------------------------------------------------------------------------
 -- Signals declaration
 -------------------------------------------------------------------------------
-  signal pkt_tx_full         : out std_logic;
-  signal pkt_rx_val          : out std_logic;
-  signal pkt_rx_sop          : out std_logic;
-  signal pkt_rx_mod          : out std_logic_vector(2 downto 0);
-  signal pkt_rx_err          : out std_logic;
-  signal pkt_rx_eop          : out std_logic;
-  signal pkt_rx_data         : out std_logic_vector(63 downto 0);
-  signal pkt_rx_avail        : out std_logic
-  signal pkt_tx_val          : in std_logic;
-  signal pkt_tx_sop          : in std_logic;
-  signal pkt_tx_mod          : in std_logic_vector(2 downto 0);
-  signal pkt_tx_eop          : in std_logic;
-  signal pkt_tx_data         : in std_logic_vector(63 downto 0);
-  signal pkt_rx_ren          : in std_logic;
+  signal pkt_tx_full         : std_logic;
+  signal pkt_rx_val          : std_logic;
+  signal pkt_rx_sop          : std_logic;
+  signal pkt_rx_mod          : std_logic_vector(2 downto 0);
+  signal pkt_rx_err          : std_logic;
+  signal pkt_rx_eop          : std_logic;
+  signal pkt_rx_data         : std_logic_vector(63 downto 0);
+  signal pkt_rx_avail        : std_logic;
+  signal pkt_tx_val          : std_logic;
+  signal pkt_tx_sop          : std_logic;
+  signal pkt_tx_mod          : std_logic_vector(2 downto 0);
+  signal pkt_tx_eop          : std_logic;
+  signal pkt_tx_data         : std_logic_vector(63 downto 0);
+  signal pkt_rx_ren          : std_logic;
 -------------------------------------------------------------------------------
 -- Signals declaration
 -------------------------------------------------------------------------------

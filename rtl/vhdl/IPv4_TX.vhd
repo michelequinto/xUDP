@@ -130,7 +130,9 @@ begin  -- rtl
 
   tx_comb : process(tx_state, wordCntData,
                     ip_tx_start, mac_tx_tready,
-                    arp_req_rslt.got_mac, ip_tx.data.tvalid)
+                    arp_req_rslt.got_mac, ip_tx.data.tvalid,
+						  tx_mac_reg, udp_conf,
+						  total_length, hdr_checksum)
   begin
     wordCntRst          <= '1';
     wordCntCount        <= '0';
