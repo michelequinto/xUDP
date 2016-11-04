@@ -50,7 +50,7 @@ architecture rtl of xaui_init is
 begin
 
   do_reset : process(clk156, rstn)
-    variable cnt : integer range 0 to 128 := 0;       -- counter
+    variable cnt : integer range 0 to 512 := 0;       -- counter
   begin
     if rstn = '0' then
       st <= wait_sync;
@@ -65,7 +65,7 @@ begin
       case st is
         when wait_sync =>
           cnt := cnt + 1;
-          if cnt = 128  then
+          if cnt = 160  then
             if status_vector /= "11111100" then
              st <= sync;
             else

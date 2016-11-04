@@ -217,6 +217,12 @@ signal axi_tx_tready            : std_logic;
 signal axi_rx_tready            : std_logic;
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+-- chipscope
+signal async_in : std_logic_vector(127 downto 0);
+signal async_out : std_logic_vector(127 downto 0);
+-------------------------------------------------------------------------------
+
 BEGIN
   
 reset <= not BRD_RESET_SW;              --reset connected only to push button for
@@ -248,8 +254,12 @@ MDIO_BLOCK : block
   
 begin
 
-  phy_init_reset <= (not mdio_clk_locked);
+  phy_init_reset <= reset or (not mdio_clk_locked) or async_out(0);
   PHY_RSTN <= not phy_reset;
+  
+  async_in(0) <= not phy_reset;
+  async_in(1) <= phy_init_done;
+  async_in(2) <= phy_init_reset;
     
   vsc8486_init_inst : entity work.vsc8486_init PORT MAP(
     reset                       => phy_init_reset,
@@ -289,8 +299,8 @@ begin
     );
 	
   mdio_opcode 		<= mdio_opcode_c 	when mdio_write_data_valid = '1' else mdio_opcode_i;
-  mdio_out_valid 	<= mdio_out_valid_c 	when mdio_write_data_valid = '1' else mdio_out_valid_i;
-  mdio_data_out 	<= mdio_data_out_c 	when mdio_write_data_valid = '1' else mdio_data_out_i;
+  mdio_out_valid 	<= mdio_out_valid_c when mdio_write_data_valid = '1' else mdio_out_valid_i;
+  mdio_data_out 	<= mdio_data_out_c when mdio_write_data_valid = '1' else mdio_data_out_i;
   
   mdio_inst : entity work.mdio PORT MAP(
     mgmt_clk 	        => mdio_clk,
@@ -327,7 +337,7 @@ begin
       I => brd_clk      -- Clock buffer input
    );
 
-  mdio_reset <= reset or (not mdio_clk_locked);
+  mdio_reset <= reset or (not mdio_clk_locked) or async_out(0);
   
 end block;
   
@@ -402,6 +412,9 @@ xaui_inst : xaui_v10_4_block
     mgt_tx_ready     => mgt_tx_ready,
     configuration_vector => configuration_vector,
     status_vector        => status_vector);
+	 
+	 async_in(15 downto 9) <= configuration_vector;
+	 async_in(23 downto 16) <= status_vector;
 
 -------------------------------------------------------------------------------
 -- Clock management logic
@@ -555,59 +568,63 @@ begin
     end if;
   end process;        
 
+	--test the mac alone
+	axi_tx.tvalid <= '0';
+	axi_rx_tready <= '1';
+	
 end block XGE_MANAGMENT_BLOCK;
 
-IP: block
-  signal control        : udp_control_type;
-  signal ip_tx          : ipv4_tx_type;
-  signal ip_rx_tready   : std_logic;
-  signal reset          : std_logic;
-  signal ip_tx_start    : std_logic := '0';
-
-  signal udp_conf       : xUDP_CONIGURATION_T;
-  signal clk            : xUDP_CLOCK_T;
-  
-begin  -- block IP
-  ip_inst : IPv4_Complete_nomac
-    port map (
-      -- IP Layer signals
-      ip_tx_start		=> ip_tx_start,
-      ip_tx			=> ip_tx,
-      ip_tx_result		=> open,
-      ip_tx_tready	        => open,
-      ip_rx_start		=> open,
-      ip_rx			=> open,
-      ip_rx_tready              => ip_rx_tready,
-      clk                       => clk,
-      udp_conf                  => udp_conf,
-     
-      control			=> control,
-      -- status signals
-      arp_pkt_count		=> open,
-      ip_pkt_count		=> open,
-      
-      mac_rx           => axi_rx,
-      mac_tx           => axi_tx,
-      mac_tx_tready    => axi_tx_tready,
-      mac_rx_tready    => axi_rx_tready );
-
-  reset <= not BRD_RESET_SW;
-  control.ip_controls.arp_controls.clear_cache <= '0';
-  
-  clk.tx_clk <= clk156;
-  clk.rx_clk <= clk156;
-  clk.tx_reset <= reset;
-  clk.rx_reset <= reset;
-
-  udp_conf.ip_address <= x"10000003";
-  udp_conf.mac_address <= x"10_1f_74_e6_a4_0d";
-  udp_conf.nwk_gateway <= x"10000000";
-  udp_conf.nwk_mask <= x"FFFFFF00";
-
-  ip_rx_tready <= '1';
-  ip_tx.data.tvalid <= '0';
-  
-end block IP;
+--IP: block
+--  signal control        : udp_control_type;
+--  signal ip_tx          : ipv4_tx_type;
+--  signal ip_rx_tready   : std_logic;
+--  signal reset          : std_logic;
+--  signal ip_tx_start    : std_logic := '0';
+--
+--  signal udp_conf       : xUDP_CONIGURATION_T;
+--  signal clk            : xUDP_CLOCK_T;
+--  
+--begin  -- block IP
+--  ip_inst : IPv4_Complete_nomac
+--    port map (
+--      -- IP Layer signals
+--      ip_tx_start		=> ip_tx_start,
+--      ip_tx			=> ip_tx,
+--      ip_tx_result		=> open,
+--      ip_tx_tready	        => open,
+--      ip_rx_start		=> open,
+--      ip_rx			=> open,
+--      ip_rx_tready              => ip_rx_tready,
+--      clk                       => clk,
+--      udp_conf                  => udp_conf,
+--     
+--      control			=> control,
+--      -- status signals
+--      arp_pkt_count		=> open,
+--      ip_pkt_count		=> open,
+--      
+--      mac_rx           => axi_rx,
+--      mac_tx           => axi_tx,
+--      mac_tx_tready    => axi_tx_tready,
+--      mac_rx_tready    => axi_rx_tready );
+--
+--  reset <= not BRD_RESET_SW;
+--  control.ip_controls.arp_controls.clear_cache <= '0';
+--  
+--  clk.tx_clk <= clk156;
+--  clk.rx_clk <= clk156;
+--  clk.tx_reset <= reset;
+--  clk.rx_reset <= reset;
+--
+--  udp_conf.ip_address <= x"10000003";
+--  udp_conf.mac_address <= x"10_1f_74_e6_a4_0d";
+--  udp_conf.nwk_gateway <= x"10000000";
+--  udp_conf.nwk_mask <= x"FFFFFF00";
+--
+--  ip_rx_tready <= '1';
+--  ip_tx.data.tvalid <= '0';
+--  
+--end block IP;
   
 
 -------------------------------------------------------------------------------  
@@ -650,5 +667,22 @@ begin
   --drive LED0 heartbeat
   FPGA_LED(0) <= hbCnt(23);
 end process;
+
+chipscope : block
+	signal control : std_logic_vector(35 downto 0);
+begin	
+	vio_inst : entity work.chipscope_vio 
+	port map(
+		CONTROL 		=> control,
+		ASYNC_IN 	=> async_in,
+		ASYNC_OUT 	=> async_out
+	);
+	
+	icon_inst : entity work.chipscope_icon
+	port map(
+		CONTROL0 		=> control
+	);
+	
+end block chipscope;
 
 END Structural;
