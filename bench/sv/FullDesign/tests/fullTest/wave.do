@@ -504,8 +504,91 @@ add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_ins
 add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/count_arp_rcvd
 add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/arp_save
 add wave -noupdate -expand -group arp_rx_inst /top/xudp/IP/ip_inst/arp_layer_inst/rx/set_eop
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/read_req
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/read_result
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/write_req
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/clear_store
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/entry_count
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/clk
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/reset
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/st_state
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/next_write_addr
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/num_entries
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/next_read_addr
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/entry_found
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/mode
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/req_entry
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/next_st_state
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/arp_entry_val
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/mode_val
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/write_addr
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/read_result_int
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/set_next_write_addr
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/set_num_entries
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/set_next_read_addr
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/write_ram
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/set_entry_found
+add wave -noupdate -expand -group arp_store_inst /top/xudp/IP/ip_inst/arp_layer_inst/store/set_mode
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/brd_clk
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_clk
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_clk_locked
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_reset
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/phy_reset
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_t
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_o
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdc_o
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mgmt_clk_locked
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mgmt_clk_locked_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_in_valid
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_out_valid
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_busy
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_opcode
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_data_in
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_data_out
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mgmt_config
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_read
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_write
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_read_data_valid
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_write_data_valid
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_read_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_write_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_address
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_data
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_address_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_data_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_prtdev_address
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_cmd_prtdev_address_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_opcode_c
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_opcode_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_out_valid_c
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_out_valid_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_data_out_c
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/mdio_data_out_i
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/phy_init_reset
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/phy_init_done
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/cmd_read_init
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/cmd_write_init
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/cmd_prtdev_address_init
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/cmd_address_init
+add wave -noupdate -expand -group mdio_block /top/xudp/MDIO_BLOCK/cmd_data_init
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/reset
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/clk
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/phy_reset
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/init_done
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_read
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_write
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_write_data_valid
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_prtdev_address
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_address
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_data
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/state
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/counter
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/init_rom
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_prt_address
+add wave -noupdate -expand -group vsc8486 /top/xudp/MDIO_BLOCK/vsc8486_init_inst/cmd_dev_address
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {2283638 ps} 0}
+WaveRestoreCursors {{Cursor 1} {2249846 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 271
 configure wave -valuecolwidth 190
@@ -521,4 +604,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {2535960 ps}
+WaveRestoreZoom {0 ps} {3241560 ps}

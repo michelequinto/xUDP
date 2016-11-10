@@ -7,6 +7,11 @@ NET "BRD_CLK_N" DIFF_TERM = "TRUE";
 NET "BRD_CLK_N" IOSTANDARD = LVDS_25;
 NET "BRD_CLK_N" LOC = H9;
 
+NET "BRD_CLK_P" TNM_NET = "sys_clk";
+TIMESPEC TS_sys_clk = PERIOD "sys_clk" 100 MHz;
+NET "MDIO_BLOCK.mdio_clk" TNM_NET = "mdio_clk";
+TIMESPEC TS_mdio_clk = PERIOD "mdio_clk" 25 MHz;
+
 NET "FPGA_LED[*]" TIG;
 NET "FPGA_LED[*]" IOSTANDARD = LVCMOS15;
 NET "FPGA_LED[0]" LOC = H10;

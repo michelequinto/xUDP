@@ -37,7 +37,10 @@ use work.xUDP_Common_pkg.all;
 library UNISIM;
 use UNISIM.Vcomponents.all;
 
-ENTITY xUDP is 
+ENTITY xUDP is
+  generic(
+    DEBUG       : boolean := TRUE
+    );      
   port(
     BRD_RESET_SW                : in  std_logic;        --board_reset_button
     BRD_CLK_P, BRD_CLK_N        : in  std_logic;        -- 100MHz_board_clk
@@ -223,6 +226,9 @@ signal async_in : std_logic_vector(127 downto 0);
 signal async_out : std_logic_vector(127 downto 0);
 -------------------------------------------------------------------------------
 
+signal xaui_init_rstn : std_logic;
+signal phy_init_reset, phy_init_done : std_logic;
+
 BEGIN
   
 reset <= not BRD_RESET_SW;              --reset connected only to push button for
@@ -230,81 +236,58 @@ reset <= not BRD_RESET_SW;              --reset connected only to push button fo
 
 MDIO_BLOCK : block
 
-  signal brd_clk, mdio_clk, mdio_clk_locked, mdio_reset : std_logic;
-  signal phy_reset : std_logic;
-  signal phy_init_reset, phy_init_done : std_logic;
-  signal mdio_in_valid, mdio_out_valid, mdio_busy : std_logic;
-  signal mdio_opcode : std_logic_vector(1 downto 0);
-  signal mdio_data_in : std_logic_vector(15 downto 0);
-  signal mdio_data_out : std_logic_vector(25 downto 0);
-  signal mgmt_config : std_logic_vector(31 downto 0);
+  signal brd_clk, mdio_clk, mdio_clk_locked, brd_clk_locked, mdio_reset : std_logic;
+  signal phy_reset, xaui_init_reset                                     : std_logic;
+  signal mdio_in_valid, mdio_out_valid, mdio_busy                       : std_logic;
+  signal mdio_opcode                                                    : std_logic_vector(1 downto 0);
+  signal mdio_data_in                                                   : std_logic_vector(15 downto 0);
+  signal mdio_data_out                                                  : std_logic_vector(25 downto 0);
+  signal mgmt_config                                                    : std_logic_vector(31 downto 0);
   signal mdio_cmd_read, mdio_cmd_write, mdio_read_data_valid, mdio_write_data_valid : std_logic;
-  signal mdio_cmd_read_i, mdio_cmd_write_i : std_logic;
-  signal mdio_cmd_address, mdio_cmd_data : std_logic_vector(15 downto 0);
-  signal mdio_cmd_address_i, mdio_cmd_data_i : std_logic_vector(15 downto 0);
-  signal mdio_cmd_prtdev_address : std_logic_vector(9 downto 0);
-  signal mdio_cmd_prtdev_address_i : std_logic_vector(9 downto 0);
-  signal mdio_opcode_c, mdio_opcode_i : std_logic_vector(1 downto 0);
-  signal mdio_out_valid_c, mdio_out_valid_i : std_logic;
-  signal mdio_data_out_c, mdio_data_out_i: std_logic_vector(25 downto 0);
-  
-  signal cmd_read_init, cmd_write_init : std_logic;
-  signal cmd_prtdev_address_init : std_logic_vector(9 downto 0);
-  signal cmd_address_init, cmd_data_init: std_logic_vector(15 downto 0);
+  signal mdio_cmd_address, mdio_cmd_data                                : std_logic_vector(15 downto 0);
+  signal mdio_cmd_prtdev_address                                        : std_logic_vector(9 downto 0);
   
 begin
 
-  phy_init_reset <= reset or (not mdio_clk_locked) or async_out(0);
+  mgmt_config <= x"00008003";            -- set clock prescale
+
+  phy_init_reset <= (not brd_clk_locked);
   PHY_RSTN <= not phy_reset;
   
-  async_in(0) <= not phy_reset;
-  async_in(1) <= phy_init_done;
-  async_in(2) <= phy_init_reset;
-    
   vsc8486_init_inst : entity work.vsc8486_init PORT MAP(
-    reset                       => phy_init_reset,
-    clk                         => mdio_clk,
-    phy_reset 			=> phy_reset,
-    init_done 			=> phy_init_done,
-    cmd_read 			=> cmd_read_init,
-    cmd_write 			=> cmd_write_init,
+    reset 						=> phy_init_reset,
+    clk 							=> mdio_clk,
+    phy_reset 					=> phy_reset,
+    init_done 					=> phy_init_done,
+    cmd_read 					=> mdio_cmd_read,
+    cmd_write 					=> mdio_cmd_write,
     cmd_write_data_valid 	=> mdio_write_data_valid,
-    cmd_prtdev_address 		=> cmd_prtdev_address_init,
-    cmd_address			=> cmd_address_init,
-    cmd_data 			=> cmd_data_init
+    cmd_prtdev_address 		=> mdio_cmd_prtdev_address,
+    cmd_address					=> mdio_cmd_address,
+    cmd_data 					=> mdio_cmd_data
     );
-	
-  mdio_cmd_read_i               <= cmd_read_init 		when phy_init_done = '0' else mdio_cmd_read;
-  mdio_cmd_write_i              <= cmd_write_init 		when phy_init_done = '0' else mdio_cmd_write;
-  mdio_cmd_prtdev_address_i     <= cmd_prtdev_address_init      when phy_init_done = '0' else mdio_cmd_prtdev_address;
-  mdio_cmd_address_i 		<= cmd_address_init             when phy_init_done = '0' else mdio_cmd_address;
-  mdio_cmd_data_i 		<= cmd_data_init 		when phy_init_done = '0' else mdio_cmd_data;
-	
+
   mdio_ctrl_inst : entity work.mdio_ctrl PORT MAP(
-    clk                 => mdio_clk,
-    reset               => mdio_reset,
-    cmd_read 		=> mdio_cmd_read_i,
-    cmd_write 		=> mdio_cmd_write_i,
-    prtdev_address 	=> mdio_cmd_prtdev_address_i,
-    address 		=> mdio_cmd_address_i,
-    data 		=> mdio_cmd_data_i,
+    clk 					=> mdio_clk,		
+    reset 				=> mdio_reset or phy_reset,
+    cmd_read 			=> mdio_cmd_read,
+    cmd_write 			=> mdio_cmd_write,
+    prtdev_address 	=> mdio_cmd_prtdev_address,
+    address 				=> mdio_cmd_address,
+    data 					=> mdio_cmd_data,
     
     read_data_valid 	=> mdio_read_data_valid,
     write_data_valid 	=> mdio_write_data_valid,
     
-    mdio_busy 		=> mdio_busy,
-    mdio_opcode 	=> mdio_opcode_c,
-    mdio_out_valid 	=> mdio_out_valid_c,
-    mdio_data_out 	=> mdio_data_out_c
+    mdio_busy 			=> mdio_busy,
+    mdio_opcode 		=> mdio_opcode,
+    mdio_out_valid 	=> mdio_out_valid,
+    mdio_data_out 		=> mdio_data_out
     );
-	
-  mdio_opcode 		<= mdio_opcode_c 	when mdio_write_data_valid = '1' else mdio_opcode_i;
-  mdio_out_valid 	<= mdio_out_valid_c when mdio_write_data_valid = '1' else mdio_out_valid_i;
-  mdio_data_out 	<= mdio_data_out_c when mdio_write_data_valid = '1' else mdio_data_out_i;
-  
+
   mdio_inst : entity work.mdio PORT MAP(
     mgmt_clk 	        => mdio_clk,
-    reset 		=> mdio_reset,
+    reset 		=> mdio_reset or phy_reset,
     busy 		=> mdio_busy,
     mdc 		=> mdc_o,
     mdio_t 		=> mdio_t,
@@ -318,13 +301,51 @@ begin
     mgmt_config 	=> mgmt_config
     );
 
+  IOBUF_MDIO : IOBUF
+    generic map (
+      DRIVE => 12,  
+      SLEW => "SLOW")
+    port map (
+      O => mdio_i,    
+      IO => MDIO_PAD,   
+      I => mdio_o,     -- Buffer input
+      T => mdio_t      -- 3-state enable input, high=input, low=output 
+   );
+       
+    MDC <= mdc_o;
+
+  xaui_init_reset <= reset or (not phy_init_done);
+  
+  Inst_xaui_init: entity work.xaui_init PORT MAP(
+    clk156              => clk156, 
+    rstn                => not xaui_init_reset,
+    status_vector 	=> status_vector,
+    config_vector 	=> configuration_vector
+    );
+  
+  count : process(brd_clk, reset, brd_clk_locked)
+  variable reset_cnt : integer range 0 to 255;
+  begin
+    if ( reset or not brd_clk_locked ) = '1' then
+      reset_cnt := 0;
+      mdio_reset <= '1';       
+    elsif rising_edge(brd_clk) then
+      if reset_cnt = 127 then
+        mdio_reset <= '0';
+      else
+        mdio_reset <= '1';
+        reset_cnt := reset_cnt + 1;
+      end if;
+    end if;
+  end process;
+
   clk_wiz_v3_3_0_inst : entity work.clk_wiz_v3_3_0 PORT MAP(
     CLK_IN1_P => BRD_CLK_P,
     CLK_IN1_N => BRD_CLK_N,       
     CLK_OUT1 => brd_clk,       
     RESET => reset,
-    LOCKED => mdio_clk_locked
-    );
+    LOCKED => brd_clk_locked
+  );
   
   BUFR_inst : BUFR
     generic map (
@@ -336,8 +357,6 @@ begin
       CLR => '0',       -- Clock buffer reset input
       I => brd_clk      -- Clock buffer input
    );
-
-  mdio_reset <= reset or (not mdio_clk_locked) or async_out(0);
   
 end block;
   
@@ -357,7 +376,8 @@ signal xgmii_rxc_int            : std_logic_vector(7 downto 0)  := (others => '0
 signal reset_156_r1             : std_logic;
 signal reset_156_r2             : std_logic;
 signal reset_156                : std_logic;
-signal resetn_156               : std_logic;
+signal xaui_init_rst            : std_logic;
+signal xaui_init_rstn           : std_logic;
 
 signal signal_detect            : std_logic_vector(3 downto 0);      
 signal align_status             : std_logic;
@@ -476,8 +496,6 @@ begin
   end if;
 end process;
 
-resetn_156 <= not reset_156; 
-
 -- Synthesise input and output registers
 p_xgmii_tx_reg : process (clk156)
 begin
@@ -495,14 +513,6 @@ begin
   end if;
 end process p_xgmii_rx_reg;
 
---to be checked in simulation
-xaui_init_inst : entity work.xaui_init
-  port map (
-    rstn => resetn_156,
-    clk156 => clk156,
-    status_vector => status_vector,
-    config_vector => configuration_vector );
-
 -- The SIGNAL_DETECT signals are intended to be driven by an attached 10GBASE-LX4 optical module;
 -- they signify that each of the four optical receivers is receiving illumination 
 -- and is therefore not just putting out noise. If an optical module is not in use, this four-wire 
@@ -510,7 +520,7 @@ xaui_init_inst : entity work.xaui_init
 
 signal_detect <= (others => '1');
 
-dclk <= clk156; 	-- GTP transceiver DRP bus not used for the time being
+dclk <= clk156; -- GTP transceiver DRP bus not used for the time being
 
 FPGA_LED(1) <= mgt_tx_ready and (not status_vector(0));									--! XAUI TX status
 FPGA_LED(2) <= sync_status(0) and sync_status(1) and sync_status(2) and sync_status(3) and (not status_vector(1));      --! XAUI RX status
@@ -518,61 +528,63 @@ FPGA_LED(3) <= align_status;
 
 end block XAUI_MANAGMENT_BLOCK;
 
+xgmii_txd <= x"0707070707070707";
+xgmii_txc <= x"FF";
 
-XGE_MANAGMENT_BLOCK : block
--------------------------------------------------------------------------------
--- Signal declarations local to XGE_MANAGMENT_BLOCK
--------------------------------------------------------------------------------  
-  signal xge_reset_n_r2 : std_logic := '0';
-  signal xge_reset_n_r1 : std_logic := '0';
-  signal xge_reset_n    : std_logic := '0';  -- reset for xge_mac
+--XGE_MANAGMENT_BLOCK : block
+---------------------------------------------------------------------------------
+---- Signal declarations local to XGE_MANAGMENT_BLOCK
+---------------------------------------------------------------------------------  
+--  signal xge_reset_n_r2 : std_logic := '0';
+--  signal xge_reset_n_r1 : std_logic := '0';
+--  signal xge_reset_n    : std_logic := '0';  -- reset for xge_mac
 
-begin
+--begin
 
-  xge_mac_axi_inst : xge_mac_axi
-    port map ( reset_xgmii_tx_n => xge_reset_n,
-               reset_xgmii_rx_n => xge_reset_n,
-               reset_156m25_n   => xge_reset_n,
-               clk_xgmii_tx     => clk156,
-               clk_xgmii_rx     => clk156,
-               clk_156m25       => clk156,
+--  xge_mac_axi_inst : xge_mac_axi
+--    port map ( reset_xgmii_tx_n => xge_reset_n,
+--               reset_xgmii_rx_n => xge_reset_n,
+--               reset_156m25_n   => xge_reset_n,
+--               clk_xgmii_tx     => clk156,
+--               clk_xgmii_rx     => clk156,
+--               clk_156m25       => clk156,
                           
-               xgmii_txd        => xgmii_txd,
-               xgmii_txc        => xgmii_txc,
-               xgmii_rxd        => xgmii_rxd,
-               xgmii_rxc        => xgmii_rxc,
+--               xgmii_txd        => xgmii_txd,
+--               xgmii_txc        => xgmii_txc,
+--               xgmii_rxd        => xgmii_rxd,
+--               xgmii_rxc        => xgmii_rxc,
                
-               wb_we_i          => '0',
-               wb_stb_i         => '0',
-               wb_rst_i         => '1',
-               wb_cyc_i         => '0',
-               wb_clk_i         => '0',
-               wb_dat_i         => (others => '0'),
-               wb_adr_i         => (others => '0'),
+--               wb_we_i          => '0',
+--               wb_stb_i         => '0',
+--               wb_rst_i         => '1',
+--               wb_cyc_i         => '0',
+--               wb_clk_i         => '0',
+--               wb_dat_i         => (others => '0'),
+--               wb_adr_i         => (others => '0'),
                
-               axi_rx           => axi_rx,
-               axi_tx           => axi_tx,
-               axi_tx_tready    => axi_tx_tready,
-               axi_rx_tready    => axi_rx_tready );
+--               axi_rx           => axi_rx,
+--               axi_tx           => axi_tx,
+--               axi_tx_tready    => axi_tx_tready,
+--               axi_rx_tready    => axi_rx_tready );
 
-  xge_mac_reset : process(clk156, reset)
-  begin
-    if reset = '1' then
-      xge_reset_n_r2 <= '0';
-      xge_reset_n_r1 <= '0';
-      xge_reset_n    <= '0';
-    elsif rising_edge(clk156) then
-      xge_reset_n_r2 <= mgt_tx_ready;
-      xge_reset_n_r1 <= xge_reset_n_r2;
-      xge_reset_n    <= xge_reset_n_r1;
-    end if;
-  end process;        
+--  xge_mac_reset : process(clk156, reset)
+--  begin
+--    if reset = '1' then
+--      xge_reset_n_r2 <= '0';
+--      xge_reset_n_r1 <= '0';
+--      xge_reset_n    <= '0';
+--    elsif rising_edge(clk156) then
+--      xge_reset_n_r2 <= mgt_tx_ready;
+--      xge_reset_n_r1 <= xge_reset_n_r2;
+--      xge_reset_n    <= xge_reset_n_r1;
+--    end if;
+--  end process;        
 
-	--test the mac alone
-	axi_tx.tvalid <= '0';
-	axi_rx_tready <= '1';
+--	--test the mac alone
+--	axi_tx.tvalid <= '0';
+--	axi_rx_tready <= '1';
 	
-end block XGE_MANAGMENT_BLOCK;
+--end block XGE_MANAGMENT_BLOCK;
 
 --IP: block
 --  signal control        : udp_control_type;
@@ -639,19 +651,12 @@ brdclk_ibufds : IBUFDS
 -- Some IO Buffer
 -------------------------------------------------------------------------------					
 fpga_prog_b_iobuf : IOBUF
-   generic map ( DRIVE => 12, SLEW => "SLOW")
+   generic map ( DRIVE => 12,
+                 SLEW => "SLOW")
    port map ( O => open,    
               IO => FPGA_PROG_B,   
               I => '0',
               T => '1' );
-
-mdio_iobuf : IOBUF
-   generic map ( DRIVE => 12, SLEW => "SLOW")
-   port map ( O => mdio_i,    
-              IO => MDIO_PAD,   
-              I => mdio_o,
-              T => mdio_t );
-MDC <= mdc_o;
 
 -------------------------------------------------------------------------------
 -- Heartbeat generated form the PHY clock
@@ -668,21 +673,25 @@ begin
   FPGA_LED(0) <= hbCnt(23);
 end process;
 
-chipscope : block
-	signal control : std_logic_vector(35 downto 0);
-begin	
-	vio_inst : entity work.chipscope_vio 
-	port map(
-		CONTROL 		=> control,
-		ASYNC_IN 	=> async_in,
-		ASYNC_OUT 	=> async_out
-	);
+--gen_if_debug : if DEBUG generate
+  
+--  chipscope : block
+--    signal control : std_logic_vector(35 downto 0);
+--  begin	
+--    vio_inst : entity work.chipscope_vio 
+--      port map(
+--        CONTROL 	=> control,
+--        ASYNC_IN 	=> async_in,
+--        ASYNC_OUT 	=> async_out
+--	);      
+    
+--    icon_inst : entity work.chipscope_icon
+--      port map(
+--        CONTROL0 	=> control
+--	);
 	
-	icon_inst : entity work.chipscope_icon
-	port map(
-		CONTROL0 		=> control
-	);
-	
-end block chipscope;
-
+--  end block chipscope;
+  
+--end generate;
+        
 END Structural;
