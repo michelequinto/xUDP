@@ -246,6 +246,8 @@ MDIO_BLOCK : block
   signal mdio_cmd_read, mdio_cmd_write, mdio_read_data_valid, mdio_write_data_valid : std_logic;
   signal mdio_cmd_address, mdio_cmd_data                                : std_logic_vector(15 downto 0);
   signal mdio_cmd_prtdev_address                                        : std_logic_vector(9 downto 0);
+  signal mdio_reset_i 																	: std_logic;
+  signal xaui_init_reset_n																	: std_logic;
   
 begin
 
@@ -253,6 +255,8 @@ begin
 
   phy_init_reset <= (not brd_clk_locked);
   PHY_RSTN <= not phy_reset;
+  
+  mdio_reset_i <= mdio_reset or phy_reset;
   
   vsc8486_init_inst : entity work.vsc8486_init PORT MAP(
     reset 						=> phy_init_reset,
@@ -269,7 +273,7 @@ begin
 
   mdio_ctrl_inst : entity work.mdio_ctrl PORT MAP(
     clk 					=> mdio_clk,		
-    reset 				=> mdio_reset or phy_reset,
+    reset 				=> mdio_reset_i,
     cmd_read 			=> mdio_cmd_read,
     cmd_write 			=> mdio_cmd_write,
     prtdev_address 	=> mdio_cmd_prtdev_address,
@@ -287,7 +291,7 @@ begin
 
   mdio_inst : entity work.mdio PORT MAP(
     mgmt_clk 	        => mdio_clk,
-    reset 		=> mdio_reset or phy_reset,
+    reset 		=> mdio_reset_i,
     busy 		=> mdio_busy,
     mdc 		=> mdc_o,
     mdio_t 		=> mdio_t,
@@ -315,10 +319,11 @@ begin
     MDC <= mdc_o;
 
   xaui_init_reset <= reset or (not phy_init_done);
+  xaui_init_reset_n <= not xaui_init_reset;
   
   Inst_xaui_init: entity work.xaui_init PORT MAP(
     clk156              => clk156, 
-    rstn                => not xaui_init_reset,
+    rstn                => xaui_init_reset_n,
     status_vector 	=> status_vector,
     config_vector 	=> configuration_vector
     );
