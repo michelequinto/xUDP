@@ -528,115 +528,116 @@ FPGA_LED(3) <= align_status;
 
 end block XAUI_MANAGMENT_BLOCK;
 
-xgmii_txd <= x"0707070707070707";
-xgmii_txc <= x"FF";
+--temporary assigment for testing w/o MAC and stack
+--xgmii_txd <= x"0707070707070707";
+--xgmii_txc <= x"FF";
 
---XGE_MANAGMENT_BLOCK : block
----------------------------------------------------------------------------------
----- Signal declarations local to XGE_MANAGMENT_BLOCK
----------------------------------------------------------------------------------  
---  signal xge_reset_n_r2 : std_logic := '0';
---  signal xge_reset_n_r1 : std_logic := '0';
---  signal xge_reset_n    : std_logic := '0';  -- reset for xge_mac
+XGE_MANAGMENT_BLOCK : block
 
---begin
+-- Signal declarations local to XGE_MANAGMENT_BLOCK
+  
+  signal xge_reset_n_r2 : std_logic := '0';
+  signal xge_reset_n_r1 : std_logic := '0';
+  signal xge_reset_n    : std_logic := '0';  -- reset for xge_mac
 
---  xge_mac_axi_inst : xge_mac_axi
---    port map ( reset_xgmii_tx_n => xge_reset_n,
---               reset_xgmii_rx_n => xge_reset_n,
---               reset_156m25_n   => xge_reset_n,
---               clk_xgmii_tx     => clk156,
---               clk_xgmii_rx     => clk156,
---               clk_156m25       => clk156,
+begin
+
+  xge_mac_axi_inst : xge_mac_axi
+    port map ( reset_xgmii_tx_n => xge_reset_n,
+               reset_xgmii_rx_n => xge_reset_n,
+               reset_156m25_n   => xge_reset_n,
+               clk_xgmii_tx     => clk156,
+               clk_xgmii_rx     => clk156,
+               clk_156m25       => clk156,
                           
---               xgmii_txd        => xgmii_txd,
---               xgmii_txc        => xgmii_txc,
---               xgmii_rxd        => xgmii_rxd,
---               xgmii_rxc        => xgmii_rxc,
+               xgmii_txd        => xgmii_txd,
+               xgmii_txc        => xgmii_txc,
+               xgmii_rxd        => xgmii_rxd,
+               xgmii_rxc        => xgmii_rxc,
                
---               wb_we_i          => '0',
---               wb_stb_i         => '0',
---               wb_rst_i         => '1',
---               wb_cyc_i         => '0',
---               wb_clk_i         => '0',
---               wb_dat_i         => (others => '0'),
---               wb_adr_i         => (others => '0'),
+               wb_we_i          => '0',
+               wb_stb_i         => '0',
+               wb_rst_i         => '1',
+               wb_cyc_i         => '0',
+               wb_clk_i         => '0',
+               wb_dat_i         => (others => '0'),
+               wb_adr_i         => (others => '0'),
                
---               axi_rx           => axi_rx,
---               axi_tx           => axi_tx,
---               axi_tx_tready    => axi_tx_tready,
---               axi_rx_tready    => axi_rx_tready );
+               axi_rx           => axi_rx,
+               axi_tx           => axi_tx,
+               axi_tx_tready    => axi_tx_tready,
+               axi_rx_tready    => axi_rx_tready );
 
---  xge_mac_reset : process(clk156, reset)
---  begin
---    if reset = '1' then
---      xge_reset_n_r2 <= '0';
---      xge_reset_n_r1 <= '0';
---      xge_reset_n    <= '0';
---    elsif rising_edge(clk156) then
---      xge_reset_n_r2 <= mgt_tx_ready;
---      xge_reset_n_r1 <= xge_reset_n_r2;
---      xge_reset_n    <= xge_reset_n_r1;
---    end if;
---  end process;        
+  xge_mac_reset : process(clk156, reset)
+  begin
+    if reset = '1' then
+      xge_reset_n_r2 <= '0';
+      xge_reset_n_r1 <= '0';
+      xge_reset_n    <= '0';
+    elsif rising_edge(clk156) then
+      xge_reset_n_r2 <= mgt_tx_ready;
+      xge_reset_n_r1 <= xge_reset_n_r2;
+      xge_reset_n    <= xge_reset_n_r1;
+    end if;
+  end process;        
 
---	--test the mac alone
+	--test the mac alone
 --	axi_tx.tvalid <= '0';
 --	axi_rx_tready <= '1';
 	
---end block XGE_MANAGMENT_BLOCK;
+end block XGE_MANAGMENT_BLOCK;
 
---IP: block
---  signal control        : udp_control_type;
---  signal ip_tx          : ipv4_tx_type;
---  signal ip_rx_tready   : std_logic;
---  signal reset          : std_logic;
---  signal ip_tx_start    : std_logic := '0';
---
---  signal udp_conf       : xUDP_CONIGURATION_T;
---  signal clk            : xUDP_CLOCK_T;
---  
---begin  -- block IP
---  ip_inst : IPv4_Complete_nomac
---    port map (
---      -- IP Layer signals
---      ip_tx_start		=> ip_tx_start,
---      ip_tx			=> ip_tx,
---      ip_tx_result		=> open,
---      ip_tx_tready	        => open,
---      ip_rx_start		=> open,
---      ip_rx			=> open,
---      ip_rx_tready              => ip_rx_tready,
---      clk                       => clk,
---      udp_conf                  => udp_conf,
---     
---      control			=> control,
---      -- status signals
---      arp_pkt_count		=> open,
---      ip_pkt_count		=> open,
---      
---      mac_rx           => axi_rx,
---      mac_tx           => axi_tx,
---      mac_tx_tready    => axi_tx_tready,
---      mac_rx_tready    => axi_rx_tready );
---
---  reset <= not BRD_RESET_SW;
---  control.ip_controls.arp_controls.clear_cache <= '0';
---  
---  clk.tx_clk <= clk156;
---  clk.rx_clk <= clk156;
---  clk.tx_reset <= reset;
---  clk.rx_reset <= reset;
---
---  udp_conf.ip_address <= x"10000003";
---  udp_conf.mac_address <= x"10_1f_74_e6_a4_0d";
---  udp_conf.nwk_gateway <= x"10000000";
---  udp_conf.nwk_mask <= x"FFFFFF00";
---
---  ip_rx_tready <= '1';
---  ip_tx.data.tvalid <= '0';
---  
---end block IP;
+IP: block
+  signal control        : udp_control_type;
+  signal ip_tx          : ipv4_tx_type;
+  signal ip_rx_tready   : std_logic;
+  signal reset          : std_logic;
+  signal ip_tx_start    : std_logic := '0';
+
+  signal udp_conf       : xUDP_CONIGURATION_T;
+  signal clk            : xUDP_CLOCK_T;
+  
+begin  -- block IP
+  ip_inst : IPv4_Complete_nomac
+    port map (
+      -- IP Layer signals
+      ip_tx_start		=> ip_tx_start,
+      ip_tx			=> ip_tx,
+      ip_tx_result		=> open,
+      ip_tx_tready	        => open,
+      ip_rx_start		=> open,
+      ip_rx			=> open,
+      ip_rx_tready              => ip_rx_tready,
+      clk                       => clk,
+      udp_conf                  => udp_conf,
+     
+      control			=> control,
+      -- status signals
+      arp_pkt_count		=> open,
+      ip_pkt_count		=> open,
+      
+      mac_rx           => axi_rx,
+      mac_tx           => axi_tx,
+      mac_tx_tready    => axi_tx_tready,
+      mac_rx_tready    => axi_rx_tready );
+
+  reset <= not BRD_RESET_SW;
+  control.ip_controls.arp_controls.clear_cache <= '0';
+  
+  clk.tx_clk <= clk156;
+  clk.rx_clk <= clk156;
+  clk.tx_reset <= reset;
+  clk.rx_reset <= reset;
+
+  udp_conf.ip_address <= x"0a_00_00_03";
+  udp_conf.mac_address <= x"10_1f_74_e6_a4_0d";
+  udp_conf.nwk_gateway <= x"0a_00_00_00";
+  udp_conf.nwk_mask <= x"FF_FF_FF_00";
+
+  ip_rx_tready <= '1';
+  ip_tx.data.tvalid <= '0';
+  
+end block IP;
   
 
 -------------------------------------------------------------------------------  
