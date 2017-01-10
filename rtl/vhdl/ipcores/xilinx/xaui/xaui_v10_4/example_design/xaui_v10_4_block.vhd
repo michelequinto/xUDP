@@ -1160,7 +1160,7 @@ begin
 
   tx_sync_i :  xaui_v10_4_tx_sync
     generic map (
-    SIM_TXPMASETPHASE_SPEEDUP   => WRAPPER_SIM_GTXRESET_SPEEDUP
+    SIM_TXPMASETPHASE_SPEEDUP   => 0
     )   
     port map (
       USER_CLK          => clk156,

@@ -136,10 +136,10 @@ task full_test::run_phase(uvm_phase phase);
 
   // Create a new ethernet_upper_layer_packet_sequence_t type of object test_seq
   // and give it the name "ethernet_upper_layer_packet_sequence". 
-   //ethernet_udp_ipv4_sequence test_seq =
-   //              ethernet_udp_ipv4_sequence::type_id::create("test_seq");
+  // ethernet_udp_ipv4_sequence test_seq =
+  //               ethernet_udp_ipv4_sequence::type_id::create("test_seq");
 
-   ethernet_arp_ipv4_sequence test_seq =
+  ethernet_arp_ipv4_sequence test_seq =
                  ethernet_arp_ipv4_sequence::type_id::create("test_seq");
   // m_sequencer is a handle for the sequencer in the agent. By calling the 
   // sequencer method "start" of test_seq with the handle to the testbench's

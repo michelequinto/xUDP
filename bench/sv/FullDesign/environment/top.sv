@@ -58,22 +58,22 @@ module automatic top;
       #15ns reset <= 1;
    end
    
-   xUDP xudp( .BRD_RESET_SW(reset),
-	      .BRD_CLK_P(clk100), .BRD_CLK_N(~clk100),
-	      .FPGA_LED(), .FPGA_PROG_B(),
-	      .DIP_GPIO(),
-
-	      //MDIO
-	      .MDIO_PAD(mdio), .MDC(xaui.MDC),
-	      //PHY
-	      .PHY_RSTN(),
-	      .PHY_LASI(), .PHY_INTA(),
-	      .PHY10G_RCK_P(clk156), .PHY10G_RCK_N(~clk156),
-   
-
-	      //XAUI
-	      .FXTX_P(xaui_lanes.tx), .FXTX_N(),
-	      .FXRX_P(xaui_lanes.rx), .FXRX_N(~xaui_lanes.rx) );
+   xUDP  #(.SIM(1)) xudp  ( .BRD_RESET_SW(reset),
+			    .BRD_CLK_P(clk100), .BRD_CLK_N(~clk100),
+			    .FPGA_LED(), .FPGA_PROG_B(),
+			    .DIP_GPIO(),
+			    
+			    //MDIO
+			    .MDIO_PAD(mdio), .MDC(xaui.MDC),
+			    //PHY
+			    .PHY_RSTN(),
+			    .PHY_LASI(), .PHY_INTA(),
+			    .PHY10G_RCK_P(clk156), .PHY10G_RCK_N(~clk156),
+			    
+			    
+			    //XAUI
+			    .FXTX_P(xaui_lanes.tx), .FXTX_N(),
+			    .FXRX_P(xaui_lanes.rx), .FXRX_N(~xaui_lanes.rx) );
 
    initial begin
       uvm_config_db #( env_pkg::bfm_type ) :: set(null, "uvm_test_top", "ETH_10G_IF", xaui );

@@ -35,7 +35,9 @@ class RandomPacketsTest extends genericTest;
 	`uvm_error("RAND_ERROR", "Randomisation failed");
       fork
 	 seq.start( env.xaui_sim_agent.m_sequencer );
-      join_none
+	 super.timeout();
+      join_any;
+      
       
    endtask // start_xUDP_sequence
    

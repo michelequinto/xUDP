@@ -39,7 +39,8 @@ use UNISIM.Vcomponents.all;
 
 ENTITY xUDP is
   generic(
-    DEBUG       : boolean := TRUE
+    DEBUG       : boolean := TRUE;
+    SIM         : boolean := FALSE
     );      
   port(
     BRD_RESET_SW                : in  std_logic;        --board_reset_button
@@ -318,8 +319,14 @@ begin
        
     MDC <= mdc_o;
 
-  xaui_init_reset <= reset or (not phy_init_done);
-  xaui_init_reset_n <= not xaui_init_reset;
+  gen_if_sim : if SIM generate
+    xaui_init_reset_n <= not reset;
+  end generate;
+
+  gen_if_syn : if not SIM generate
+    xaui_init_reset <= reset or (not phy_init_done);
+    xaui_init_reset_n <= not xaui_init_reset;
+  end generate;         
   
   Inst_xaui_init: entity work.xaui_init PORT MAP(
     clk156              => clk156, 

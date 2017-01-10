@@ -49,7 +49,7 @@ task ethernet_arp_ipv4_sequence::body();
    //m_config.wait_for_reset();
    //m_config.wait_for_clock();
 
-   repeat(20)
+   repeat(50)
      begin
 	`uvm_info("ID", "Starting ARP sequence", UVM_NONE);
 	start_item(arp);                                            

@@ -24,6 +24,7 @@ package env_pkg;
 `include "env.svh"
 
 `include "ethernet_udp_ipv4_sequence.sv"
+`include "ethernet_arp_ipv4_sequence.sv"
 
 `define USE_UVM_TLM_CLK
 

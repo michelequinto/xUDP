@@ -95,10 +95,8 @@ class genericTest extends uvm_test;
       phase.raise_objection(this, "Start test");
       
       wait_for_xUDP();
-      fork
-	 start_xUDP_sequence();
-	 timeout();
-      join
+      
+      start_xUDP_sequence();
 
       phase.drop_objection(this,"Test done");
    endtask // run_phase
@@ -117,7 +115,7 @@ class genericTest extends uvm_test;
    //Timeout of the whole test. 
    //By default: 5us.
    virtual task timeout();
-      # 5us;
+      # 1ms;
    endtask // timeout
    
    //Group XAUI configuration
