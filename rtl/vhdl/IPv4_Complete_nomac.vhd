@@ -201,7 +201,7 @@ begin
   );
 
   arp_mac_tx.tdata <= arp_mac_tx_i.tdata;
-  arp_mac_tx.tvalid <= arp_mac_tx_i.tvalid or mac_tx_req;
+  arp_mac_tx.tvalid <= arp_mac_tx_i.tvalid;
   arp_mac_tx.tlast <= arp_mac_tx_i.tlast;
   arp_mac_tx.tkeep <= arp_mac_tx_i.tkeep;
 

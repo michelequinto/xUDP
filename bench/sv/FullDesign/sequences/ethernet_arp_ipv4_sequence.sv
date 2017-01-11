@@ -73,7 +73,7 @@ task ethernet_arp_ipv4_sequence::body();
 				    src_address[5] == 8'h00;
 				    dest_address[5] == 8'h0D;
 
-				    //opcode == 16'h0002;
+				    //opcode == 16'h0001;
 
 				    protocol_addr_length == 4;
 				    source_protocol_addr[0] == 8'h10;

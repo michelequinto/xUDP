@@ -117,6 +117,9 @@ architecture rtl of axi_tx_crossbar is
           axi_out.tkeep <= axi_in(i).tkeep;
           axi_out.tlast <= axi_in(i).tlast;
           axi_in_tready(i) <= axi_out_tready;
+        else
+          axi_out.tvalid <= '0';
+          axi_out.tlast <= '0';
         end if;   
       end loop;
     end process;

@@ -132,6 +132,7 @@ signal pkt_tx_data         : std_logic_vector(63 downto 0);
 signal pkt_rx_ren          : std_logic;
 signal axi_rx_tvalid_i     : std_logic;
 signal frame_started       : std_logic := '0';
+signal tvalid_d            : std_logic;
 -------------------------------------------------------------------------------
 -- Signals declaration
 -------------------------------------------------------------------------------
@@ -255,13 +256,13 @@ signal frame_started       : std_logic := '0';
   pkt_rx_ren <= axi_rx_tready;
 
   generate_sop : process(clk_156m25)
-    variable tvalid_d : std_logic := '0';
   begin
     if rising_edge(clk_156m25) then
-      pkt_tx_sop <= axi_tx.tvalid and (not tvalid_d);
-      tvalid_d := axi_tx.tvalid;
+      tvalid_d <= axi_tx.tvalid;
     end if;
   end process;
+
+  pkt_tx_sop <= axi_tx.tvalid and (not tvalid_d);
   
   pkt_tx_val <= axi_tx.tvalid;
   pkt_tx_eop <= axi_tx.tlast; 

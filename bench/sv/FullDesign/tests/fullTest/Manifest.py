@@ -11,8 +11,9 @@ __import__('os').environ.get('QUESTA_MVC_HOME') + '/questa_mvc_src/sv/ethernet/ 
 top_module = "top"
 sim_tool = "modelsim"
 
-files = ["full_test.sv"]
+files = ["src/full_test.sv"]
 
 modules = { "local" : [ "../../../../../syn/xilinx/src",
                         "../../../../../rtl/vhdl/ipcores/xilinx/xaui",
-                        "../../../../../rtl/verilog/ipcores/xge_mac" ] }
+                        "../../../../../rtl/verilog/ipcores/xge_mac",
+                        "../../../../../rtl/vhdl/" ] }
