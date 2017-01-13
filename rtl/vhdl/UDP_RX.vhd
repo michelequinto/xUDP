@@ -30,4 +30,27 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
 use work.arp_types.all;
+use work.axi_types.all;
+use work.ipv4_types.all;
 use work.xUDP_Common_pkg.all;
+
+entity UDP_RX  is
+  port(
+    -- UDP Layer signals
+    udp_rx_start : out std_logic;       -- indicates receipt of udp header
+    udp_rxo      : out udp_rx_type;
+    udp_rx_data_out_ready : in std_logic;
+    -- system signals
+    clk          : in  std_logic;
+    reset        : in  std_logic;
+    -- IP layer RX signals
+    ip_rx_start  : in  std_logic;       -- indicates receipt of ip header
+    ip_rx        : in  ipv4_rx_type
+);
+end UDP_RX ;
+
+architecture rtl of UDP_RX is
+
+begin
+    
+end rtl;        
