@@ -150,34 +150,42 @@ component xge_mac_axi is
     );
 end component;
 
-component IPv4_Complete_nomac
+component UDP_Complete_nomac is
   generic (
-    CLOCK_FREQ			: integer := 156250000;					-- freq of data_in_clk -- needed to timout cntr
+    CLOCK_FREQ			: integer := 156000000;					-- freq of data_in_clk -- needed to timout cntr
     ARP_TIMEOUT			: integer := 60;					-- ARP response timeout (s)
     ARP_MAX_PKT_TMO             : integer := 5;						-- # wrong nwk pkts received before set error
     MAX_ARP_ENTRIES 	        : integer := 255					-- max entries in the ARP store
     );
-    port (
-      -- IP Layer signals
-      ip_tx_start			: in std_logic;
-      ip_tx				: in ipv4_tx_type;
-      ip_tx_result			: out std_logic_vector (1 downto 0);
-      ip_tx_tready	                : out std_logic;									
-      ip_rx_start			: out std_logic;
-      ip_rx				: out ipv4_rx_type;
-      ip_rx_tready                      : in std_logic;
-      -- clock
-      clk                               : in xUDP_CLOCK_T;
-      udp_conf                          : in xUDP_CONIGURATION_T;
-      control				: in udp_control_type;
-      -- status signals
-      arp_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- count of arp pkts received
-      ip_pkt_count			: out STD_LOGIC_VECTOR(7 downto 0);		-- number of IP pkts received for us
-      mac_tx                            : out axi4_dvlk64_t;
-      mac_rx                            : in axi4_dvlk64_t;
-      mac_tx_tready                     : in std_logic;
-      mac_rx_tready                     : out std_logic
-      );
+  port (
+    -- UDP TX signals
+    udp_tx_start		: in std_logic;				        	-- indicates req to tx UDP
+    udp_txi			: in udp_tx_type;			        	-- UDP tx cxns
+    udp_tx_result		: out std_logic_vector (1 downto 0);                    -- tx status (changes during transmission)
+    udp_tx_data_out_ready       : out std_logic;			        	-- indicates udp_tx is ready to take data
+    
+    -- UDP RX signals
+    udp_rx_start		: out std_logic;			        	-- indicates receipt of udp header
+    udp_rxo			: out udp_rx_type;
+    udp_rx_data_out_ready       : in std_logic;
+    
+    -- IP RX signals
+    ip_rx_hdr			: out ipv4_rx_header_type;
+
+    -- system signals
+    clk                         : in xUDP_CLOCK_T;
+    udp_conf                    : in xUDP_CONIGURATION_T;
+    control			: in udp_control_type;
+    
+    -- status signals
+    arp_pkt_count		: out STD_LOGIC_VECTOR(7 downto 0);	        	-- count of arp pkts received
+    ip_pkt_count		: out STD_LOGIC_VECTOR(7 downto 0);		        -- number of IP pkts received for us
+    
+    mac_tx                      : out axi4_dvlk64_t;
+    mac_rx                      : in axi4_dvlk64_t;
+    mac_tx_tready               : in std_logic;
+    mac_rx_tready               : out std_logic
+    );
 end component;
 
 -------------------------------------------------------------------------------
@@ -593,45 +601,50 @@ begin
     end if;
   end process;        
 
-	--test the mac alone
---	axi_tx.tvalid <= '0';
---	axi_rx_tready <= '1';
+-- test the mac alone
+--axi_tx.tvalid <= '0';
+--axi_rx_tready <= '1';
 	
 end block XGE_MANAGMENT_BLOCK;
 
 IP: block
-  signal control        : udp_control_type;
-  signal ip_tx          : ipv4_tx_type;
-  signal ip_rx_tready   : std_logic;
-  signal reset          : std_logic;
-  signal ip_tx_start    : std_logic := '0';
-
-  signal udp_conf       : xUDP_CONIGURATION_T;
-  signal clk            : xUDP_CLOCK_T;
   
-begin  -- block IP
-  ip_inst : IPv4_Complete_nomac
+  signal control                : udp_control_type;
+  signal udp_txi                : udp_tx_type;
+  signal udp_rx_data_out_ready  : std_logic;
+  signal udp_tx_data_out_ready  : std_logic;
+  signal reset                  : std_logic;
+  signal udp_tx_start           : std_logic := '0';
+
+  signal udp_conf               : xUDP_CONIGURATION_T;
+  signal clk                    : xUDP_CLOCK_T;
+  
+begin  -- block UDP
+  
+  udp_inst : UDP_Complete_nomac
     port map (
       -- IP Layer signals
-      ip_tx_start		=> ip_tx_start,
-      ip_tx			=> ip_tx,
-      ip_tx_result		=> open,
-      ip_tx_tready	        => open,
-      ip_rx_start		=> open,
-      ip_rx			=> open,
-      ip_rx_tready              => ip_rx_tready,
+      udp_tx_start		=> udp_tx_start,
+      udp_txi			=> udp_txi,
+      udp_tx_result		=> open,
+      udp_tx_data_out_ready	=> udp_tx_data_out_ready,
+      udp_rx_start		=> open,
+      udp_rxo			=> open,
+      udp_rx_data_out_ready     => udp_rx_data_out_ready,
+
+      -- system signals
       clk                       => clk,
       udp_conf                  => udp_conf,
-     
       control			=> control,
+      
       -- status signals
       arp_pkt_count		=> open,
       ip_pkt_count		=> open,
       
-      mac_rx           => axi_rx,
-      mac_tx           => axi_tx,
-      mac_tx_tready    => axi_tx_tready,
-      mac_rx_tready    => axi_rx_tready );
+      mac_rx                    => axi_rx,
+      mac_tx                    => axi_tx,
+      mac_tx_tready             => axi_tx_tready,
+      mac_rx_tready             => axi_rx_tready );
 
   reset <= not BRD_RESET_SW;
   control.ip_controls.arp_controls.clear_cache <= '0';
@@ -646,8 +659,8 @@ begin  -- block IP
   udp_conf.nwk_gateway <= x"0a_00_00_00";
   udp_conf.nwk_mask <= x"FF_FF_FF_00";
 
-  ip_rx_tready <= '1';
-  ip_tx.data.tvalid <= '0';
+  udp_rx_data_out_ready <= '1';
+  udp_txi.data.tvalid <= '0';
   
 end block IP;
   

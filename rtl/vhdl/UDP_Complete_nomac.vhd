@@ -106,7 +106,8 @@ architecture rtl  of UDP_Complete_nomac is
     reset        : in  std_logic;
     -- IP layer RX signals
     ip_rx_start  : in  std_logic;       -- indicates receipt of ip header
-    ip_rx        : in  ipv4_rx_type
+    ip_rx        : in  ipv4_rx_type;
+    ip_rx_data_out_ready : out std_logic
     );      
   end component;
 
@@ -151,7 +152,7 @@ end component;
 
   signal ip_rx_start		        : std_logic;
   signal ip_rx				: ipv4_rx_type;
-  signal ip_rx_tready                   : std_logic;
+  signal ip_rx_data_out_ready           : std_logic;
   
 begin  -- rtl 
 
@@ -183,7 +184,8 @@ begin  -- rtl
       reset                     => clk.rx_reset,
       -- IP layer RX signals
       ip_rx_start               => ip_rx_start,
-      ip_rx                     => ip_rx
+      ip_rx                     => ip_rx,
+      ip_rx_data_out_ready      => ip_rx_data_out_ready
     );
 
   ip_inst : IPv4_Complete_nomac
@@ -196,7 +198,7 @@ begin  -- rtl
       
       ip_rx_start		=> ip_rx_start,
       ip_rx			=> ip_rx,
-      ip_rx_tready              => ip_rx_tready,
+      ip_rx_tready              => ip_rx_data_out_ready,
       
       clk                       => clk,
       udp_conf                  => udp_conf,

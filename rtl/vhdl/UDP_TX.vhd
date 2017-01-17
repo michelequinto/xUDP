@@ -73,10 +73,109 @@ architecture rtl  of UDP_TX is
 --	|                                          ....                                            |
 --	|                                                                                          |
 --	--------------------------------------------------------------------------------------------
+
+  type tx_state_type is (IDLE, PAUSE, SEND_UDP_HDR, SEND_USER_DATA);
+  signal tx_state, next_tx_state : tx_state_type;
+
+  signal next_tx_result : std_logic_vector(1 downto 0);
+  signal tx_result : std_logic_vector(1 downto 0);
+  signal set_tx_result : std_logic;
+
+  signal total_length		: std_logic_vector (15 downto 0);
   
 begin  -- rtl 
 
+  -- calculate packet total lenght in bytes
+  total_length <= std_logic_vector(unsigned(udp_txi.hdr.data_length) + 8);
   
+  comb_proc : process(tx_state,
+                      total_length,
+                      ip_tx_data_out_ready,
+                      ip_tx_result,
+                      udp_tx_start,
+                      udp_txi.data.tlast,
+                      udp_txi.data.tvalid)
+  begin
+    ip_tx_start <= '0';
+    udp_tx_data_out_ready <= '0';
+
+    set_tx_result <= '0';
+
+    ip_tx.data.tvalid <= '0';
+    ip_tx.data.tlast <= '0';
+    ip_tx.data.tdata <= (others => 'X');
+    ip_tx.data.tkeep <= (others => 'X');
+
+    next_tx_state <= tx_state;
+      
+    case tx_state is
+      when IDLE =>
+        if udp_tx_start = '1' then
+          if unsigned(udp_txi.hdr.data_length) > MAX_UDP_PAYLOAD_LENGTH then
+            next_tx_result <= UDPTX_RESULT_ERR;
+            set_tx_result <= '1';
+          else
+            next_tx_result <= UDPTX_RESULT_SENDING;
+            set_tx_result <= '1';
+
+            next_tx_state <= PAUSE;
+          end if;
+        end if;
+        
+      when PAUSE =>
+        -- delay one clock for IP layer to respond to ip_tx_start and remove any tx error result
+        next_tx_state <= SEND_UDP_HDR;
+        
+      when SEND_UDP_HDR =>
+        if ip_tx_result = IPTX_RESULT_ERR then
+          next_tx_result <= UDPTX_RESULT_ERR;
+          set_tx_result <= '1';
+
+          next_tx_state <= IDLE;
+        elsif ip_tx_data_out_ready = '1' then
+          ip_tx.data.tvalid <= '1';
+          ip_tx.data.tlast <= '0';
+          ip_tx.data.tdata <= udp_txi.hdr.src_port  &
+                              udp_txi.hdr.dst_port &
+                              total_length &
+                              udp_txi.hdr.checksum;
+          ip_tx.data.tkeep <= (others => '1');  
+          
+          next_tx_state <= SEND_USER_DATA;
+        end if;
+        
+      when SEND_USER_DATA =>
+        udp_tx_data_out_ready <= ip_tx_data_out_ready;
+        ip_tx.data.tvalid <= udp_txi.data.tvalid;
+        ip_tx.data.tlast <= udp_txi.data.tlast;
+        ip_tx.data.tdata <= udp_txi.data.tdata;
+        ip_tx.data.tkeep <= udp_txi.data.tkeep;
+        if( udp_txi.data.tlast = '1' ) then
+          next_tx_state <= IDLE;
+        end if;
+      when others =>
+        next_tx_state <= IDLE;
+    end case;
+  end process;
   
-  
+  seq_proc : process(tx_clk, reset)
+  begin
+    if reset = '1' then
+      tx_state <= IDLE;
+    elsif rising_edge(tx_clk) then
+      tx_state <= next_tx_state;
+    end if;
+  end process;
+
+  tx_result_latch : process(tx_clk, reset)
+  begin
+    if reset = '1' then
+      tx_result <= IPTX_RESULT_NONE;
+    elsif rising_edge(tx_clk) then
+      if( set_tx_result = '1' ) then 
+        tx_result <= next_tx_result;
+      end if;
+    end if;
+  end process;
+
 end rtl ;
