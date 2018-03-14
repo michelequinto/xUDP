@@ -102,7 +102,7 @@ architecture rtl  of UDP_Complete_nomac is
     udp_rxo      : out udp_rx_type;
     udp_rx_data_out_ready : in std_logic;
     -- system signals
-    clk          : in  std_logic;
+    rx_clk       : in  std_logic;
     reset        : in  std_logic;
     -- IP layer RX signals
     ip_rx_start  : in  std_logic;       -- indicates receipt of ip header
@@ -180,7 +180,7 @@ begin  -- rtl
       udp_rxo                   => udp_rxo,
       udp_rx_data_out_ready     => udp_rx_data_out_ready,
       -- system signals
-      clk                       => clk.rx_clk,
+      rx_clk                    => clk.rx_clk,
       reset                     => clk.rx_reset,
       -- IP layer RX signals
       ip_rx_start               => ip_rx_start,
