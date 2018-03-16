@@ -238,6 +238,15 @@ signal async_out : std_logic_vector(127 downto 0);
 signal xaui_init_rstn : std_logic;
 signal phy_init_reset, phy_init_done : std_logic;
 
+-------------------------------------------------------------------------------
+-- stack test signals
+-------------------------------------------------------------------------------
+signal tx_tvalid                   : std_logic;
+signal tx_tlast                    : std_logic;
+signal tx_tready                   : std_logic;
+signal tx_start                    : std_logic;
+signal tx_tdata                    : std_logic_vector(63 downto 0);
+
 BEGIN
   
 reset <= not BRD_RESET_SW;              --reset connected only to push button for
@@ -255,8 +264,8 @@ MDIO_BLOCK : block
   signal mdio_cmd_read, mdio_cmd_write, mdio_read_data_valid, mdio_write_data_valid : std_logic;
   signal mdio_cmd_address, mdio_cmd_data                                : std_logic_vector(15 downto 0);
   signal mdio_cmd_prtdev_address                                        : std_logic_vector(9 downto 0);
-  signal mdio_reset_i 																	: std_logic;
-  signal xaui_init_reset_n																	: std_logic;
+  signal mdio_reset_i 					                : std_logic;
+  signal xaui_init_reset_n						: std_logic;
   
 begin
 
@@ -600,10 +609,6 @@ begin
       xge_reset_n    <= xge_reset_n_r1;
     end if;
   end process;        
-
--- test the mac alone
---axi_tx.tvalid <= '0';
---axi_rx_tready <= '1';
 	
 end block XGE_MANAGMENT_BLOCK;
 
@@ -660,7 +665,20 @@ begin  -- block UDP
   udp_conf.nwk_mask <= x"FF_FF_FF_00";
 
   udp_rx_data_out_ready <= '1';
-  udp_txi.data.tvalid <= '0';
+
+  -- test UDP
+  udp_txi.data.tvalid <= tx_tvalid;
+  udp_txi.data.tlast <= tx_tlast;
+  udp_txi.data.tdata <= tx_tdata;
+  udp_txi.data.tkeep <= x"FF";
+  tx_tready <= udp_tx_data_out_ready;
+  udp_tx_start <= tx_start;
+
+  udp_txi.hdr.dst_ip_addr <= x"0a_00_00_01";
+  udp_txi.hdr.dst_port <= x"1010";              
+  udp_txi.hdr.src_port <= x"1010";            
+  udp_txi.hdr.data_length <= x"0010";            
+  udp_txi.hdr.checksum <= x"FF_FF";   
   
 end block IP;
   

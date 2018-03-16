@@ -138,6 +138,7 @@ begin  -- rtl
     tkeep_i             <= (others => 'X');
     tvalid_i            <= '0';
     mac_rx_tready       <= '1';
+    ip_rx_start         <= '0';
     next_rx_state       <= rx_state;
     case rx_state is
       when IDLE =>
@@ -170,6 +171,7 @@ begin  -- rtl
                 set_dest_ip_l <= '1';
                 tvalid_i <= '1';       
                 tkeep_i <= "00111111";
+                ip_rx_start <= '1';
                 next_rx_state <= USER_DATA;
               when others =>            -- do nothing
             end case;

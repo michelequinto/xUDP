@@ -95,11 +95,11 @@ begin
     case rx_state is
       when IDLE =>
         if ip_rx_start = '1' then
-          next_rx_state <= IDLE;
+          next_rx_state <= UDP_HDR;
         end if;
       when UDP_HDR =>
         set_udp_header <= '1';
-        next_rx_state <= USER_DATA;
+         next_rx_state <= USER_DATA;
       when USER_DATA =>
         ip_rx_data_out_ready <= udp_rx_data_out_ready;
         udp_rxo.data.tdata <= ip_rx.data.tdata;
@@ -133,8 +133,8 @@ begin
       udp_rxo.hdr.is_valid <= '0';
     elsif rising_edge(rx_clk) then
       if( set_udp_header = '1' ) then
-        udp_rxo.hdr.data_length <= std_logic_vector(unsigned(ip_rx.data.tdata(31 downto 16))-8);
-        udp_rxo.hdr.src_port    <= ip_rx.data.tdata(63 downto 48);
+        udp_rxo.hdr.data_length <= std_logic_vector(unsigned(ip_rx.data.tdata(15 downto 0))-8);
+        udp_rxo.hdr.src_port    <= ip_rx.data.tdata(31 downto 16);
         udp_rxo.hdr.dst_port    <= ip_rx.data.tdata(47 downto 32);
         udp_rxo.hdr.src_ip_addr <= ip_rx.hdr.src_ip_addr;
         udp_rxo.hdr.is_valid <= '1';

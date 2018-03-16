@@ -46,9 +46,6 @@ task ethernet_udp_ipv4_sequence::body();
 
    m_config = mvc_config_base::get_config(m_sequencer);
    
-   //m_config.wait_for_reset();
-   //m_config.wait_for_clock();
-
    repeat(10)
      begin
 	`uvm_info("ID", "Starting UDP sequence", UVM_NONE);
@@ -63,26 +60,26 @@ task ethernet_udp_ipv4_sequence::body();
 				    udp.time_to_live == 0;
 				    udp.header_checksum == 16'hBAC1;
 				    //mac
+
+				    src_address[0] == 8'h10;
+				    dest_address[0] == 8'h10;
+				    src_address[1] == 8'h1F;
+				    dest_address[1] == 8'h1F;
 				    
-				    //src_address[0] == 8'hFF;
-				    //dest_address[0] == 8'h11;
-				    src_address[1] == 8'h02;
-				    //dest_address[1] == 8'h00;
 				    
+				    src_address[2] == 8'h74;
+				    dest_address[2] == 8'h74;
+				    src_address[3] == 8'he6;
+				    dest_address[3] == 8'he6;
 				    
-				    src_address[2] == 8'h03;
-				    dest_address[2] == 8'h01;
-				    src_address[3] == 8'h04;
-				    dest_address[3] == 8'h01;
-				    
-				    src_address[4] == 8'h05;
-				    dest_address[4] == 8'h01;
-				    src_address[5] == 8'h06;
-				    dest_address[5] == 8'h01;
-				    
+				    src_address[4] == 8'ha4;
+				    dest_address[4] == 8'ha4;
+				    src_address[5] == 8'h00;
+				    dest_address[5] == 8'h0D;
+				  				    
 				    //ip address
-				    udp.source_ip_address == 32'h10_00_00_01;
-				    udp.destination_ip_address == 32'h10_00_00_03;
+				    udp.source_ip_address == 32'h0a_00_00_01;
+				    udp.destination_ip_address == 32'h0a_00_00_03;
 				    //port
 				    udp.destination_port_address == 16'ha5a5;
 				    udp.source_port_address == 16'hfcfc;

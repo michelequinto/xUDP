@@ -56,6 +56,7 @@ task ethernet_arp_ipv4_sequence::body();
 	if ( !arp.randomize() with {
 				    arp.vlan_mode == ETH_VLAN_UNTAGGED;
 				    protocol_type == ETH_TYPE_0800;
+				    //type_value == ETH_TYPE_ARP_PACKET;
 
 				    src_address[0] == 8'h10;
 				    dest_address[0] == 8'h10;
@@ -73,11 +74,11 @@ task ethernet_arp_ipv4_sequence::body();
 				    src_address[5] == 8'h00;
 				    dest_address[5] == 8'h0D;
 
-				    //opcode == 16'h0001;
+				    //opcode == ETH_ARP_REQUEST;
 
 				    protocol_addr_length == 4;
-				    source_protocol_addr[0] == 8'h10;
-				    destination_protocol_addr[0] == 8'h10;
+				    source_protocol_addr[0] == 8'h0a;
+				    destination_protocol_addr[0] == 8'h0a;
 				    source_protocol_addr[1] == 8'h00;
 				    destination_protocol_addr[1] == 8'h00;
 				    source_protocol_addr[2] == 8'h00;
