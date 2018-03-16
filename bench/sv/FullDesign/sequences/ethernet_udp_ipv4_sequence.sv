@@ -83,6 +83,11 @@ task ethernet_udp_ipv4_sequence::body();
 				    //port
 				    udp.destination_port_address == 16'ha5a5;
 				    udp.source_port_address == 16'hfcfc;
+
+				    udp.udp_data[0] == 32'hFF00_0001;
+				    udp.udp_data[1] == 32'h0000_0002;
+				    udp.udp_data[2] == 32'h0000_0003;
+				    udp.udp_data[3] == 32'hFF00_0004;
 				    
 				    udp.tx_error == 1'b0 ; 
 				    udp.tx_error_on_cycle == 0 ;

@@ -52,7 +52,7 @@ end UDP_RX ;
 
 architecture rtl of UDP_RX is
 
-  type rx_state_type is (IDLE, UDP_HDR, USER_DATA);
+  type rx_state_type is (IDLE, UDP_HDR, UDP_CRC, USER_DATA);
   signal next_rx_state, rx_state : rx_state_type;
   signal set_udp_header : std_logic;
 
@@ -99,7 +99,14 @@ begin
         end if;
       when UDP_HDR =>
         set_udp_header <= '1';
-         next_rx_state <= USER_DATA;
+         next_rx_state <= UDP_CRC;
+      when UDP_CRC => 
+        ip_rx_data_out_ready <= udp_rx_data_out_ready;
+        udp_rxo.data.tdata <= ip_rx.data.tdata;
+        udp_rxo.data.tvalid <= ip_rx.data.tvalid;
+        udp_rxo.data.tlast <= ip_rx.data.tlast;
+        udp_rxo.data.tkeep <= x"3f";
+        next_rx_state <= USER_DATA;    
       when USER_DATA =>
         ip_rx_data_out_ready <= udp_rx_data_out_ready;
         udp_rxo.data.tdata <= ip_rx.data.tdata;
