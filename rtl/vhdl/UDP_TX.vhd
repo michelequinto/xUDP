@@ -106,6 +106,10 @@ begin  -- rtl
     ip_tx.data.tdata <= (others => 'X');
     ip_tx.data.tkeep <= (others => 'X');
 
+    ip_tx.hdr.protocol <= x"11"; -- UDP protocol
+    ip_tx.hdr.data_length <= total_length;  
+    ip_tx.hdr.dst_ip_addr <= udp_txi.hdr.dst_ip_addr;
+    
     next_tx_state <= tx_state;
       
     case tx_state is
@@ -124,6 +128,8 @@ begin  -- rtl
         
       when PAUSE =>
         -- delay one clock for IP layer to respond to ip_tx_start and remove any tx error result
+        ip_tx_start <= '1';      
+        
         next_tx_state <= SEND_UDP_HDR;
         
       when SEND_UDP_HDR =>

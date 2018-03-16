@@ -18,6 +18,12 @@ module automatic top;
    logic clk156 = 0;
    wire mdio;
 
+   logic [63:0] udp_tx_tdata;
+   logic 	udp_tx_tvalid = 0;
+   logic 	udp_tx_tlast = 0;
+   logic 	udp_tx_tready;
+   logic 	udp_tx_start = 0;
+
    mgc_ethernet xaui( .iclk_0(1'bz), .iclk_1(1'bz), .ireset(1'bz), .iMDC(1'bz), .ian_clk_0(1'bz), .ian_clk_1(1'bz) );
    assign mdio = xaui.MDIO_OUT;
    assign xaui.MDIO_IN = mdio;
@@ -74,6 +80,37 @@ module automatic top;
 			    //XAUI
 			    .FXTX_P(xaui_lanes.tx), .FXTX_N(),
 			    .FXRX_P(xaui_lanes.rx), .FXRX_N(~xaui_lanes.rx) );
+
+   assign xudp.tx_tvalid = udp_tx_tvalid;
+   assign xudp.tx_tlast = udp_tx_tlast;
+   assign udp_tx_tready = xudp.tx_tready;
+   assign xudp.tx_tdata = udp_tx_tdata;
+   assign xudp.tx_start = udp_tx_start;
+
+   //drive udp_tx
+   initial begin
+      udp_tx_start <= 0;
+      #2us;
+      udp_tx_start <= 1;
+      #3.2ns;
+      udp_tx_start <= 0;
+   end
+
+   
+    initial begin
+      wait(udp_tx_tready) begin
+	 udp_tx_tvalid <= 1;
+	 udp_tx_tdata <= 64'ha5a5_a5a5_a5a5_a5a5;
+	 udp_tx_tlast <= 0;
+	 #19.2ns;
+	 udp_tx_tvalid <= 1;
+	 udp_tx_tdata <= 64'ha5a5_a5a5_a5a5_a5a5;
+	 udp_tx_tlast <= 1;
+	 #6.4ns;
+	 udp_tx_tvalid <= 0;
+	 udp_tx_tlast <= 0;
+      end
+   end
 
    initial begin
       uvm_config_db #( env_pkg::bfm_type ) :: set(null, "uvm_test_top", "ETH_10G_IF", xaui );

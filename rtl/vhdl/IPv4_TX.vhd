@@ -130,7 +130,7 @@ begin  -- rtl
 
   tx_comb : process(tx_state, wordCntData,
                     ip_tx_start, mac_tx_tready,
-                    arp_req_rslt.got_mac, ip_tx.data.tvalid,
+                    arp_req_rslt.got_mac, ip_tx.data.tvalid, ip_tx.data.tlast,
                     tx_mac_reg, udp_conf,
                     total_length, hdr_checksum)
   begin
@@ -165,6 +165,7 @@ begin  -- rtl
            next_tx_state <= SEND_HDR;
         end if;
       when SEND_HDR =>
+        mac_tx.tvalid <= '1';
         wordCntRst <= '0';
         if mac_tx_tready = '1' then
           wordCntCount <= '1';
